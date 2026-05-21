@@ -1,0 +1,464 @@
+// ─────────────────────────────────────────────────────────────
+// FOUR PAWS ACADEMY — COMPLETE COURSE CATALOGUE
+// 5 Courses × 4 Modules × 6 Lessons = 120 lessons
+// + 6 Premium Add-Ons
+// ─────────────────────────────────────────────────────────────
+
+export const COURSES = [
+  {
+    id: 'course-1',
+    slug: 'elite-puppy-foundations',
+    title: 'Elite Puppy Foundations',
+    subtitle: 'The definitive first-year blueprint for the discerning owner',
+    description: 'A comprehensive, psychology-driven programme that transforms the critical first year of your puppy\'s life into the foundation of an exceptional companion. Designed exclusively for owners who demand nothing less than perfection.',
+    duration: '8 weeks',
+    level: 'Foundation',
+    icon: '🐾',
+    color: 'from-amber-900/40 to-yellow-900/20',
+    accentColor: '#C9A84C',
+    modules: [
+      {
+        id: 'c1-m1',
+        title: 'The Architecture of Connection',
+        subtitle: 'Forge an unbreakable bond from day one',
+        order: 1,
+        lessons: [
+          { id: 'c1-m1-l1', title: 'The Psychology of Canine Attachment', duration: '18 min', type: 'video', order: 1 },
+          { id: 'c1-m1-l2', title: 'Creating Your Puppy\'s Luxury Environment', duration: '22 min', type: 'video', order: 2 },
+          { id: 'c1-m1-l3', title: 'First Night Protocol — The Premium Approach', duration: '15 min', type: 'video', order: 3 },
+          { id: 'c1-m1-l4', title: 'Reading Your Puppy\'s Emotional Language', duration: '25 min', type: 'video', order: 4 },
+          { id: 'c1-m1-l5', title: 'Trust Building Rituals', duration: '20 min', type: 'video', order: 5 },
+          { id: 'c1-m1-l6', title: 'Module Assessment — Bonding Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c1-m2',
+        title: 'Cognitive Development Accelerator',
+        subtitle: 'Unlock your puppy\'s extraordinary intelligence',
+        order: 2,
+        lessons: [
+          { id: 'c1-m2-l1', title: 'The Canine Brain — An Owner\'s Guide', duration: '20 min', type: 'video', order: 1 },
+          { id: 'c1-m2-l2', title: 'Critical Learning Windows — Timing is Everything', duration: '18 min', type: 'video', order: 2 },
+          { id: 'c1-m2-l3', title: 'Premium Enrichment Design', duration: '24 min', type: 'video', order: 3 },
+          { id: 'c1-m2-l4', title: 'Problem Solving Foundations', duration: '22 min', type: 'video', order: 4 },
+          { id: 'c1-m2-l5', title: 'Confidence Architecture Through Exploration', duration: '19 min', type: 'video', order: 5 },
+          { id: 'c1-m2-l6', title: 'Module Assessment — Cognitive Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c1-m3',
+        title: 'Social Mastery Programme',
+        subtitle: 'Raise a socially exceptional companion',
+        order: 3,
+        lessons: [
+          { id: 'c1-m3-l1', title: 'The Socialisation Blueprint', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c1-m3-l2', title: 'Curated Socialisation Experiences', duration: '20 min', type: 'video', order: 2 },
+          { id: 'c1-m3-l3', title: 'Dog-to-Dog Relationship Architecture', duration: '25 min', type: 'video', order: 3 },
+          { id: 'c1-m3-l4', title: 'Human Introductions — The Elegant Way', duration: '18 min', type: 'video', order: 4 },
+          { id: 'c1-m3-l5', title: 'Navigating Complex Environments', duration: '21 min', type: 'video', order: 5 },
+          { id: 'c1-m3-l6', title: 'Module Assessment — Social Intelligence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c1-m4',
+        title: 'Household Harmony System',
+        subtitle: 'Seamless integration into your lifestyle',
+        order: 4,
+        lessons: [
+          { id: 'c1-m4-l1', title: 'Toilet Training — The Premium Protocol', duration: '20 min', type: 'video', order: 1 },
+          { id: 'c1-m4-l2', title: 'Sleep Architecture & Night Routines', duration: '17 min', type: 'video', order: 2 },
+          { id: 'c1-m4-l3', title: 'Crate as Sanctuary — Luxury Introduction', duration: '22 min', type: 'video', order: 3 },
+          { id: 'c1-m4-l4', title: 'Mealtime Manners & Feeding Rituals', duration: '16 min', type: 'video', order: 4 },
+          { id: 'c1-m4-l5', title: 'Managing Visitors & Household Guests', duration: '19 min', type: 'video', order: 5 },
+          { id: 'c1-m4-l6', title: 'Graduation — Foundation Mastery Ceremony', duration: '12 min', type: 'assessment', order: 6 },
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'course-2',
+    slug: 'luxury-behaviour-transformation',
+    title: 'Luxury Behaviour Transformation',
+    subtitle: 'Redefine your dog\'s character at the deepest level',
+    description: 'An advanced psychological transformation programme that addresses behavioural challenges at their root. Using cutting-edge canine science combined with our exclusive methodology, this course delivers permanent, elegant results.',
+    duration: '10 weeks',
+    level: 'Advanced',
+    icon: '✨',
+    color: 'from-purple-900/40 to-indigo-900/20',
+    accentColor: '#9B7FD4',
+    modules: [
+      {
+        id: 'c2-m1',
+        title: 'Behavioural Root Analysis',
+        subtitle: 'Understanding the deeper architecture',
+        order: 1,
+        lessons: [
+          { id: 'c2-m1-l1', title: 'The Science of Canine Behaviour', duration: '25 min', type: 'video', order: 1 },
+          { id: 'c2-m1-l2', title: 'Mapping Your Dog\'s Behaviour Profile', duration: '22 min', type: 'video', order: 2 },
+          { id: 'c2-m1-l3', title: 'Triggers, Thresholds & Tipping Points', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c2-m1-l4', title: 'The Emotional Regulation System', duration: '24 min', type: 'video', order: 4 },
+          { id: 'c2-m1-l5', title: 'Creating Your Transformation Blueprint', duration: '18 min', type: 'video', order: 5 },
+          { id: 'c2-m1-l6', title: 'Module Assessment — Root Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c2-m2',
+        title: 'Counterconditioning Mastery',
+        subtitle: 'Rewire emotional responses elegantly',
+        order: 2,
+        lessons: [
+          { id: 'c2-m2-l1', title: 'Classical Conditioning for Elite Results', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c2-m2-l2', title: 'Desensitisation Architecture', duration: '25 min', type: 'video', order: 2 },
+          { id: 'c2-m2-l3', title: 'The Premium CC/DS Protocol', duration: '28 min', type: 'video', order: 3 },
+          { id: 'c2-m2-l4', title: 'Maintaining Below Threshold Mastery', duration: '20 min', type: 'video', order: 4 },
+          { id: 'c2-m2-l5', title: 'Measuring & Celebrating Progress', duration: '16 min', type: 'video', order: 5 },
+          { id: 'c2-m2-l6', title: 'Module Assessment — Reconditioning Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c2-m3',
+        title: 'Impulse Control Architecture',
+        subtitle: 'The disciplined, composed companion',
+        order: 3,
+        lessons: [
+          { id: 'c2-m3-l1', title: 'The Neuroscience of Self-Control', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c2-m3-l2', title: 'Leave It — The Luxury Protocol', duration: '18 min', type: 'video', order: 2 },
+          { id: 'c2-m3-l3', title: 'Threshold Management in Real Environments', duration: '24 min', type: 'video', order: 3 },
+          { id: 'c2-m3-l4', title: 'Door Manners & Spatial Elegance', duration: '20 min', type: 'video', order: 4 },
+          { id: 'c2-m3-l5', title: 'The Long Stay — Patience as Lifestyle', duration: '22 min', type: 'video', order: 5 },
+          { id: 'c2-m3-l6', title: 'Module Assessment — Control Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c2-m4',
+        title: 'Lifestyle Integration',
+        subtitle: 'Perfecting the transformed companion',
+        order: 4,
+        lessons: [
+          { id: 'c2-m4-l1', title: 'Real-World Proofing Strategies', duration: '24 min', type: 'video', order: 1 },
+          { id: 'c2-m4-l2', title: 'Maintaining Transformation Under Pressure', duration: '20 min', type: 'video', order: 2 },
+          { id: 'c2-m4-l3', title: 'The Guest Experience Protocol', duration: '18 min', type: 'video', order: 3 },
+          { id: 'c2-m4-l4', title: 'Urban Living — The Composed Dog', duration: '22 min', type: 'video', order: 4 },
+          { id: 'c2-m4-l5', title: 'Your Ongoing Maintenance Programme', duration: '16 min', type: 'video', order: 5 },
+          { id: 'c2-m4-l6', title: 'Transformation Graduation — Certificate of Excellence', duration: '12 min', type: 'assessment', order: 6 },
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'course-3',
+    slug: 'reactive-dog-recovery',
+    title: 'Reactive Dog Recovery',
+    subtitle: 'The compassionate path from reactive to remarkable',
+    description: 'Specifically engineered for reactive dogs and their owners, this programme combines the latest in canine neuroscience with compassionate, results-driven methodology. Transform your reactive dog into a calm, confident companion.',
+    duration: '12 weeks',
+    level: 'Specialist',
+    icon: '🔬',
+    color: 'from-teal-900/40 to-emerald-900/20',
+    accentColor: '#4ECDC4',
+    modules: [
+      {
+        id: 'c3-m1',
+        title: 'Understanding Reactivity',
+        subtitle: 'Compassionate science-based insights',
+        order: 1,
+        lessons: [
+          { id: 'c3-m1-l1', title: 'The Reactive Brain — Neurological Insights', duration: '26 min', type: 'video', order: 1 },
+          { id: 'c3-m1-l2', title: 'Identifying Your Dog\'s Reactivity Profile', duration: '22 min', type: 'video', order: 2 },
+          { id: 'c3-m1-l3', title: 'The Stress Bucket Theory in Practice', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c3-m1-l4', title: 'Management vs Training — The Distinction', duration: '18 min', type: 'video', order: 4 },
+          { id: 'c3-m1-l5', title: 'Setting Realistic Premium Expectations', duration: '16 min', type: 'video', order: 5 },
+          { id: 'c3-m1-l6', title: 'Module Assessment — Reactivity Intelligence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c3-m2',
+        title: 'Emergency Recovery Toolkit',
+        subtitle: 'Immediate management strategies that work',
+        order: 2,
+        lessons: [
+          { id: 'c3-m2-l1', title: 'The Emergency U-Turn Protocol', duration: '20 min', type: 'video', order: 1 },
+          { id: 'c3-m2-l2', title: 'Find It — The Decompression Tool', duration: '18 min', type: 'video', order: 2 },
+          { id: 'c3-m2-l3', title: 'Spatial Management in Public', duration: '22 min', type: 'video', order: 3 },
+          { id: 'c3-m2-l4', title: 'On-Lead Reactive Episodes — Recovery Guide', duration: '24 min', type: 'video', order: 4 },
+          { id: 'c3-m2-l5', title: 'Communicating With Other Owners', duration: '15 min', type: 'video', order: 5 },
+          { id: 'c3-m2-l6', title: 'Module Assessment — Emergency Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c3-m3',
+        title: 'Systematic Desensitisation Programme',
+        subtitle: 'Long-term healing begins here',
+        order: 3,
+        lessons: [
+          { id: 'c3-m3-l1', title: 'Building Your Trigger Hierarchy', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c3-m3-l2', title: 'The LAT Protocol — Look at That', duration: '25 min', type: 'video', order: 2 },
+          { id: 'c3-m3-l3', title: 'BAT 2.0 — Behaviour Adjustment Training', duration: '28 min', type: 'video', order: 3 },
+          { id: 'c3-m3-l4', title: 'Working With Dog-Reactive Dogs', duration: '24 min', type: 'video', order: 4 },
+          { id: 'c3-m3-l5', title: 'People Reactivity — Specialist Protocol', duration: '22 min', type: 'video', order: 5 },
+          { id: 'c3-m3-l6', title: 'Module Assessment — Systematic Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c3-m4',
+        title: 'The Confident Dog Lifestyle',
+        subtitle: 'Living fully with a recovered reactive dog',
+        order: 4,
+        lessons: [
+          { id: 'c3-m4-l1', title: 'Rebuilding Confidence Through Enrichment', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c3-m4-l2', title: 'The Decompression Walk System', duration: '18 min', type: 'video', order: 2 },
+          { id: 'c3-m4-l3', title: 'Integrating Recovery Into Daily Life', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c3-m4-l4', title: 'Setbacks — The Premium Response Protocol', duration: '16 min', type: 'video', order: 4 },
+          { id: 'c3-m4-l5', title: 'Celebrating Your Remarkable Recovery', duration: '15 min', type: 'video', order: 5 },
+          { id: 'c3-m4-l6', title: 'Recovery Graduation — Remarkable Dog Ceremony', duration: '12 min', type: 'assessment', order: 6 },
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'course-4',
+    slug: 'advanced-obedience-psychology',
+    title: 'Advanced Obedience Psychology',
+    subtitle: 'Precision, grace and effortless control',
+    description: 'For the owner who demands impeccable standards. This elite programme develops an extraordinary level of communication and control between you and your dog, resulting in a companion of exceptional poise and responsiveness.',
+    duration: '10 weeks',
+    level: 'Elite',
+    icon: '👑',
+    color: 'from-rose-900/40 to-pink-900/20',
+    accentColor: '#E8A0BF',
+    modules: [
+      {
+        id: 'c4-m1',
+        title: 'The Language of Precision',
+        subtitle: 'Developing crystal-clear communication',
+        order: 1,
+        lessons: [
+          { id: 'c4-m1-l1', title: 'Communication Architecture — Beyond Commands', duration: '24 min', type: 'video', order: 1 },
+          { id: 'c4-m1-l2', title: 'The Marker System — Precision Timing', duration: '20 min', type: 'video', order: 2 },
+          { id: 'c4-m1-l3', title: 'Body Language as a Training Tool', duration: '22 min', type: 'video', order: 3 },
+          { id: 'c4-m1-l4', title: 'Variable Reinforcement — The Elite Schedule', duration: '26 min', type: 'video', order: 4 },
+          { id: 'c4-m1-l5', title: 'Adding Duration, Distance & Distraction', duration: '28 min', type: 'video', order: 5 },
+          { id: 'c4-m1-l6', title: 'Module Assessment — Communication Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c4-m2',
+        title: 'Elite Foundation Behaviours',
+        subtitle: 'The core behaviours perfected',
+        order: 2,
+        lessons: [
+          { id: 'c4-m2-l1', title: 'The Perfect Heel — Luxury Leash Walking', duration: '28 min', type: 'video', order: 1 },
+          { id: 'c4-m2-l2', title: 'The Reliable Recall — Life-Saving Skill', duration: '25 min', type: 'video', order: 2 },
+          { id: 'c4-m2-l3', title: 'The Polished Sit — Precision Position', duration: '18 min', type: 'video', order: 3 },
+          { id: 'c4-m2-l4', title: 'The Elegant Down Stay', duration: '22 min', type: 'video', order: 4 },
+          { id: 'c4-m2-l5', title: 'Place Training — The Civilised Dog', duration: '24 min', type: 'video', order: 5 },
+          { id: 'c4-m2-l6', title: 'Module Assessment — Foundation Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c4-m3',
+        title: 'Advanced Skill Architecture',
+        subtitle: 'Elevate to extraordinary',
+        order: 3,
+        lessons: [
+          { id: 'c4-m3-l1', title: 'Off-Lead Freedom — Building the Dream', duration: '26 min', type: 'video', order: 1 },
+          { id: 'c4-m3-l2', title: 'Emergency Protocol Behaviours', duration: '22 min', type: 'video', order: 2 },
+          { id: 'c4-m3-l3', title: 'Directional Training & Hand Signals', duration: '24 min', type: 'video', order: 3 },
+          { id: 'c4-m3-l4', title: 'Scent Work — Enrichment Through Mastery', duration: '28 min', type: 'video', order: 4 },
+          { id: 'c4-m3-l5', title: 'The Therapy Dog Standard', duration: '25 min', type: 'video', order: 5 },
+          { id: 'c4-m3-l6', title: 'Module Assessment — Advanced Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c4-m4',
+        title: 'Real-World Obedience Mastery',
+        subtitle: 'Perfection in every environment',
+        order: 4,
+        lessons: [
+          { id: 'c4-m4-l1', title: 'Urban Obedience — The City Companion', duration: '24 min', type: 'video', order: 1 },
+          { id: 'c4-m4-l2', title: 'Restaurant & Hospitality Etiquette', duration: '20 min', type: 'video', order: 2 },
+          { id: 'c4-m4-l3', title: 'Travel & Transport Etiquette', duration: '22 min', type: 'video', order: 3 },
+          { id: 'c4-m4-l4', title: 'The Social Event Protocol', duration: '18 min', type: 'video', order: 4 },
+          { id: 'c4-m4-l5', title: 'Maintaining Excellence Long-Term', duration: '20 min', type: 'video', order: 5 },
+          { id: 'c4-m4-l6', title: 'Graduation — Excellence Award Ceremony', duration: '12 min', type: 'assessment', order: 6 },
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'course-5',
+    slug: 'canine-lifestyle-optimisation',
+    title: 'Canine Lifestyle Optimisation',
+    subtitle: 'The pinnacle of canine wellbeing and fulfilment',
+    description: 'The ultimate holistic programme for the owner who views their dog as an integral part of a luxury lifestyle. Combining optimal physical health, mental enrichment, emotional wellbeing and social excellence into one definitive system.',
+    duration: '8 weeks',
+    level: 'Lifestyle',
+    icon: '🌟',
+    color: 'from-sky-900/40 to-blue-900/20',
+    accentColor: '#7EC8E3',
+    modules: [
+      {
+        id: 'c5-m1',
+        title: 'Holistic Wellness Architecture',
+        subtitle: 'The foundation of extraordinary health',
+        order: 1,
+        lessons: [
+          { id: 'c5-m1-l1', title: 'The Luxury Wellness Blueprint', duration: '24 min', type: 'video', order: 1 },
+          { id: 'c5-m1-l2', title: 'Optimal Nutrition for Peak Performance', duration: '28 min', type: 'video', order: 2 },
+          { id: 'c5-m1-l3', title: 'Sleep Optimisation for Dogs', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c5-m1-l4', title: 'Exercise as Medicine — The Science', duration: '22 min', type: 'video', order: 4 },
+          { id: 'c5-m1-l5', title: 'Preventative Health Protocols', duration: '18 min', type: 'video', order: 5 },
+          { id: 'c5-m1-l6', title: 'Module Assessment — Wellness Mastery', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c5-m2',
+        title: 'Elite Enrichment Design',
+        subtitle: 'A life of meaningful stimulation',
+        order: 2,
+        lessons: [
+          { id: 'c5-m2-l1', title: 'The Five Pillars of Canine Enrichment', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c5-m2-l2', title: 'Cognitive Games for Intelligent Dogs', duration: '25 min', type: 'video', order: 2 },
+          { id: 'c5-m2-l3', title: 'Scent & Sniff — Natural Enrichment Systems', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c5-m2-l4', title: 'Physical Enrichment Architecture', duration: '18 min', type: 'video', order: 4 },
+          { id: 'c5-m2-l5', title: 'DIY Luxury Enrichment — The Creative Owner', duration: '24 min', type: 'video', order: 5 },
+          { id: 'c5-m2-l6', title: 'Module Assessment — Enrichment Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c5-m3',
+        title: 'The Social Lifestyle',
+        subtitle: 'Thriving in every social context',
+        order: 3,
+        lessons: [
+          { id: 'c5-m3-l1', title: 'The Dog-Friendly Lifestyle — Urban Edition', duration: '22 min', type: 'video', order: 1 },
+          { id: 'c5-m3-l2', title: 'Café Culture & Dining With Your Dog', duration: '18 min', type: 'video', order: 2 },
+          { id: 'c5-m3-l3', title: 'Building Your Dog\'s Social Network', duration: '20 min', type: 'video', order: 3 },
+          { id: 'c5-m3-l4', title: 'Dog-Friendly Travel — International Guide', duration: '26 min', type: 'video', order: 4 },
+          { id: 'c5-m3-l5', title: 'Hosting Dog-Friendly Events', duration: '18 min', type: 'video', order: 5 },
+          { id: 'c5-m3-l6', title: 'Module Assessment — Social Excellence', duration: '10 min', type: 'assessment', order: 6 },
+        ]
+      },
+      {
+        id: 'c5-m4',
+        title: 'Legacy & Longevity',
+        subtitle: 'Creating a lifetime of excellence',
+        order: 4,
+        lessons: [
+          { id: 'c5-m4-l1', title: 'Ageing Gracefully — Senior Dog Care', duration: '24 min', type: 'video', order: 1 },
+          { id: 'c5-m4-l2', title: 'Your Dog\'s Ongoing Development Plan', duration: '20 min', type: 'video', order: 2 },
+          { id: 'c5-m4-l3', title: 'Building Community & Legacy', duration: '18 min', type: 'video', order: 3 },
+          { id: 'c5-m4-l4', title: 'The Ambassador Dog — Your Living Legacy', duration: '22 min', type: 'video', order: 4 },
+          { id: 'c5-m4-l5', title: 'Passing It Forward — Inspiring Others', duration: '16 min', type: 'video', order: 5 },
+          { id: 'c5-m4-l6', title: 'Grand Graduation — Lifestyle Mastery Award', duration: '14 min', type: 'assessment', order: 6 },
+        ]
+      }
+    ]
+  }
+]
+
+// ─────────────────────────────────────────
+// PREMIUM ADD-ONS
+// ─────────────────────────────────────────
+export const ADDONS = [
+  {
+    id: 'addon-1',
+    title: 'Anxiety Recovery Programme',
+    subtitle: 'From anxious to serene — a complete healing journey',
+    description: 'A deeply compassionate, science-backed programme specifically designed for dogs experiencing anxiety, fear, or chronic stress. Transform your dog\'s nervous system and quality of life.',
+    duration: '6 weeks',
+    icon: '🌊',
+    color: 'from-blue-900/40 to-cyan-900/20',
+    accentColor: '#7EC8E3',
+    price: '£297',
+    features: ['Separation anxiety protocol', 'Fear-based behaviour solutions', 'Nervous system regulation', 'Medication support guidance', 'Custom anxiety management plan'],
+    modules: 3,
+    lessons: 18
+  },
+  {
+    id: 'addon-2',
+    title: 'Travel Dog Mastery',
+    subtitle: 'The world is your dog\'s oyster',
+    description: 'For the globe-trotting owner who refuses to leave their companion behind. Everything you need to travel seamlessly with your dog — from luxury hotels to international flights.',
+    duration: '4 weeks',
+    icon: '✈️',
+    color: 'from-emerald-900/40 to-teal-900/20',
+    accentColor: '#4ECDC4',
+    price: '£197',
+    features: ['Air travel preparation', 'International pet passport guide', 'Luxury hotel etiquette', 'Car & ferry travel protocols', 'Worldwide dog-friendly destinations'],
+    modules: 2,
+    lessons: 12
+  },
+  {
+    id: 'addon-3',
+    title: 'Luxury Home Behaviour System',
+    subtitle: 'Perfecting the home companion',
+    description: 'Specifically designed for the discerning home owner, this programme ensures your dog is the perfect house guest — elegant, composed, and an absolute joy to live with.',
+    duration: '5 weeks',
+    icon: '🏛️',
+    color: 'from-amber-900/40 to-orange-900/20',
+    accentColor: '#FFB347',
+    price: '£197',
+    features: ['No-jump greeting system', 'Furniture & boundary training', 'Theft prevention protocols', 'Visitor management system', 'Multi-room household harmony'],
+    modules: 2,
+    lessons: 12
+  },
+  {
+    id: 'addon-4',
+    title: 'Advanced Socialisation System',
+    subtitle: 'The consummate social companion',
+    description: 'Take social skills to the highest level. Whether with people, dogs, or complex environments — your dog will navigate every social situation with effortless confidence.',
+    duration: '6 weeks',
+    icon: '🤝',
+    color: 'from-violet-900/40 to-purple-900/20',
+    accentColor: '#B388FF',
+    price: '£247',
+    features: ['Dog park mastery', 'Off-lead social protocols', 'Multi-dog household harmony', 'Children & family integration', 'Urban social confidence'],
+    modules: 3,
+    lessons: 18
+  },
+  {
+    id: 'addon-5',
+    title: 'Advanced Enrichment Programme',
+    subtitle: 'A brilliantly stimulated mind',
+    description: 'For the intellectually curious dog and their equally curious owner. This advanced enrichment system goes deep into canine cognitive science and creates a brilliantly stimulated companion.',
+    duration: '4 weeks',
+    icon: '🧠',
+    color: 'from-pink-900/40 to-rose-900/20',
+    accentColor: '#FF8FAB',
+    price: '£197',
+    features: ['Advanced scent work', 'Trick training psychology', 'Canine freestyle foundations', 'Puzzle design mastery', 'Competition sport introduction'],
+    modules: 2,
+    lessons: 12
+  },
+  {
+    id: 'addon-6',
+    title: 'Confidence Building Blueprint',
+    subtitle: 'Transforming the fearful into the fearless',
+    description: 'A compassionate, structured programme for shy, fearful, or under-confident dogs. Through gentle systematic methods, watch your dog blossom into a confident, joyful companion.',
+    duration: '6 weeks',
+    icon: '💎',
+    color: 'from-slate-900/40 to-gray-900/20',
+    accentColor: '#90CAF9',
+    price: '£247',
+    features: ['Confidence foundation skills', 'Fear-free exposure protocols', 'Optimism training techniques', 'Resilience architecture', 'Long-term confidence maintenance'],
+    modules: 3,
+    lessons: 18
+  }
+]
+
+// Helper utilities
+export const getCourseById = (id) => COURSES.find(c => c.id === id)
+export const getAddonById = (id) => ADDONS.find(a => a.id === id)
+export const getTotalLessons = (course) => course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
+export const getProgressPercent = (courseId, completedLessons = []) => {
+  const course = getCourseById(courseId)
+  if (!course) return 0
+  const total = getTotalLessons(course)
+  const completed = course.modules.flatMap(m => m.lessons).filter(l => completedLessons.includes(l.id)).length
+  return Math.round((completed / total) * 100)
+}
