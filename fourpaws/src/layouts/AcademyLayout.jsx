@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
   LogOut, Menu, X, ChevronRight, Shield, MapPin,
-  BarChart2, Clock, Award, User, Flame, Sparkles, Volume2
+  BarChart2, Clock, Award, User, Flame, Sparkles, Volume2,
+  Brain, Zap
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAI } from '../hooks/useAI'
@@ -23,6 +24,10 @@ const NAV_ITEMS = [
   { icon: Clock,           label: 'Timeline',       to: '/academy/timeline',       exact: false },
   { icon: BarChart2,       label: 'Analytics',      to: '/academy/analytics',      exact: false },
   { icon: AlertTriangle,   label: 'Emergency',      to: '/academy/emergency',      exact: false },
+  { icon: Brain,           label: 'Digital Twin',   to: '/academy/twin',           exact: false },
+  { icon: Sparkles,        label: 'Wellness',       to: '/academy/wellness',       exact: false },
+  { icon: Zap,             label: 'Weekly Report',  to: '/academy/report',         exact: false },
+  { icon: Award,           label: 'Archive',        to: '/academy/archive',        exact: false },
 ]
 
 function TierBadge({ tier }) {

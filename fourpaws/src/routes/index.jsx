@@ -8,16 +8,16 @@ import AdminLayout     from '../layouts/AdminLayout'
 import LoadingScreen   from '../components/ui/LoadingScreen'
 import AcademyLockGate from '../components/ui/AcademyLockGate'
 
-// ── Public ────────────────────────────────────────────────────
+// ── Public ─────────────────────────────────────────────────────
 const HomePage       = lazy(() => import('../pages/public/HomePage'))
 const AboutPage      = lazy(() => import('../pages/public/AboutPage'))
 const LoginPage      = lazy(() => import('../pages/public/LoginPage'))
 const ActivationPage = lazy(() => import('../pages/academy/ActivationPage'))
 
-// ── Onboarding ────────────────────────────────────────────────
+// ── Onboarding ─────────────────────────────────────────────────
 const OnboardingQuiz = lazy(() => import('../pages/academy/OnboardingQuiz'))
 
-// ── Academy ───────────────────────────────────────────────────
+// ── Academy V1 ──────────────────────────────────────────────────
 const AcademyDashboard  = lazy(() => import('../pages/academy/AcademyDashboard'))
 const CourseOverview    = lazy(() => import('../pages/academy/CourseOverview'))
 const LessonPage        = lazy(() => import('../pages/academy/LessonPage'))
@@ -27,7 +27,13 @@ const BehaviourTimeline = lazy(() => import('../pages/academy/BehaviourTimeline'
 const BehaviourHeatmap  = lazy(() => import('../pages/academy/BehaviourHeatmap'))
 const EmergencyMode     = lazy(() => import('../pages/academy/EmergencyMode'))
 
-// ── Admin ─────────────────────────────────────────────────────
+// ── Academy V2 ──────────────────────────────────────────────────
+const DigitalTwin        = lazy(() => import('../pages/academy/DigitalTwin'))
+const WellnessDashboard  = lazy(() => import('../pages/academy/WellnessDashboard'))
+const WeeklyReport       = lazy(() => import('../pages/academy/WeeklyReport'))
+const LegacyArchive      = lazy(() => import('../pages/academy/LegacyArchive'))
+
+// ── Admin ──────────────────────────────────────────────────────
 const AdminDashboard   = lazy(() => import('../pages/admin/AdminDashboard'))
 const ClientsPage      = lazy(() => import('../pages/admin/ClientsPage'))
 const ClientDetailPage = lazy(() => import('../pages/admin/ClientDetailPage'))
@@ -38,7 +44,6 @@ const DistributionPage = lazy(() => import('../pages/admin/DistributionPage'))
 // ─────────────────────────────────────────────────────────────
 // GUARDS
 // ─────────────────────────────────────────────────────────────
-
 function AdminRoute({ children }) {
   const { state } = useApp()
   if (!state.isAuthenticated) return <Navigate to="/login" replace />
@@ -103,14 +108,23 @@ export default function AppRoutes() {
             </OnboardingGuard>
           </ClientRoute>
         }>
+          {/* Core */}
           <Route path="/academy"                                   element={<AcademyDashboard />} />
           <Route path="/academy/course/:courseId"                  element={<CourseOverview />} />
           <Route path="/academy/course/:courseId/lesson/:lessonId" element={<LessonPage />} />
           <Route path="/academy/addons"                            element={<AddonsPage />} />
-          <Route path="/academy/passport"                          element={<PuppyPassport />} />
-          <Route path="/academy/timeline"                          element={<BehaviourTimeline />} />
-          <Route path="/academy/analytics"                         element={<BehaviourHeatmap />} />
-          <Route path="/academy/emergency"                         element={<EmergencyMode />} />
+
+          {/* V1 features */}
+          <Route path="/academy/passport"   element={<PuppyPassport />} />
+          <Route path="/academy/timeline"   element={<BehaviourTimeline />} />
+          <Route path="/academy/analytics"  element={<BehaviourHeatmap />} />
+          <Route path="/academy/emergency"  element={<EmergencyMode />} />
+
+          {/* V2 features */}
+          <Route path="/academy/twin"      element={<DigitalTwin />} />
+          <Route path="/academy/wellness"  element={<WellnessDashboard />} />
+          <Route path="/academy/report"    element={<WeeklyReport />} />
+          <Route path="/academy/archive"   element={<LegacyArchive />} />
         </Route>
 
         {/* Admin */}
