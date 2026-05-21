@@ -25,6 +25,7 @@ import {
   isOnboardingComplete,
   patchAIMemory,
 } from '../ai/aiMemory'
+import { saveDogToLicense, patchLicense } from '../utils/academyLicense'
 
 export function useAI() {
   const { state, dispatch, ACTIONS } = useApp()
@@ -57,6 +58,7 @@ export function useAI() {
   // ── Complete onboarding ────────────────────────────────────
   const completeOnboarding = useCallback((dogProfile, clientProfile) => {
     markOnboardingComplete(dogProfile, clientProfile)
+    saveDogToLicense(dogProfile)
     dispatch({ type: ACTIONS.SET_DOG_PROFILE,    payload: dogProfile })
     dispatch({ type: ACTIONS.SET_CLIENT_PROFILE, payload: { ...state.clientProfile, ...clientProfile } })
     dispatch({ type: ACTIONS.SET_ONBOARDING_DONE })

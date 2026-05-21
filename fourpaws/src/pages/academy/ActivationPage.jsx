@@ -9,6 +9,7 @@ import {
   buildClientUserFromEntry,
   getOrCreateDeviceId,
 } from '../../utils/academyIdentity'
+import { issueLicense } from '../../utils/academyLicense'
 
 // ── Individual code segment input ────────────────────────────
 function CodeInput({ segments, onChange }) {
@@ -100,7 +101,8 @@ export default function ActivationPage() {
       return
     }
 
-    // Link device ──────────────────────────────────────────
+    // Issue license + link device ───────────────────────────
+    issueLicense(result.entry)
     const deviceIdentity = linkDeviceToClient(result.entry)
     const clientUser     = buildClientUserFromEntry(result.entry)
 

@@ -6,6 +6,7 @@ import {
   getClientIdentity,
   unlinkDevice,
 } from '../utils/academyIdentity'
+import { resetLicense } from '../utils/academyLicense'
 import {
   loadAIMemory,
   recordSession,
@@ -414,6 +415,7 @@ export function AppProvider({ children }) {
 
   const logout = useCallback(() => {
     unlinkDevice()
+    resetLicense()
     dispatch({ type: ACTIONS.LOGOUT })
   }, [])
 

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { academyStatusLabel, ACADEMY_STATUS, registerClientInRegistry } from '../../utils/academyIdentity'
+import { suspendLicenseForClient, getActivationLog, LICENSE_STATUS } from '../../utils/academyLicense'
 
 const APP_URL = window.location.origin
 
@@ -81,6 +82,11 @@ export default function AcademyIdentityCard({ client, onStatusChange }) {
     // Update registry
     const updated = { ...client, academyStatus: newStatus }
     registerClientInRegistry(updated)
+
+    // Also update local license if the client is on this device (same-device admin scenario)
+    if (newStatus === ACADEMY_STATUS.SUSPENDED) {
+      suspendLicenseForClient(client.academyLinkCode)
+    }
 
     notify(
       newStatus === ACADEMY_STATUS.SUSPENDED
