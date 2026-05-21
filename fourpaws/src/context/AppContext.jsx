@@ -1,4 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react'
+import {
+  seedRegistryFromClients,
+  syncProgressToRegistry,
+  getLinkedDeviceIdentity,
+  getClientIdentity,
+  unlinkDevice,
+} from '../utils/academyIdentity'
 
 // ─────────────────────────────────────────
 // INITIAL STATE — Single Source of Truth
@@ -9,38 +16,46 @@ const initialState = {
   isLoading: false,
   notification: null,
 
-  // Auth (Run 3+)
+  // Auth
   currentUser: null,
   isAuthenticated: false,
   userRole: null, // 'client' | 'admin'
 
-  // Client profile (Run 2+)
+  // Client profile
   clientProfile: null,
 
-  // Academy access (Run 2+)
+  // Academy access
   enrolledCourses: [],
   ownedAddons: [],
 
-  // Progress tracking (Run 2+)
+  // Progress tracking
   courseProgress: {},
-  // structure: { [courseId]: { completedLessons: [], completedModules: [], percentComplete: 0 } }
 
-  // Dashboard state (Run 2+)
+  // Dashboard state
   activeCourseId: null,
   activeModuleId: null,
   activeLessonId: null,
 
-  // Messaging (Run 3+)
+  // Messaging
   messages: [],
   unreadCount: 0,
   notifications: [],
 
-  // Admin state (Run 3+)
+  // Admin state
   allClients: [],
   analyticsData: null,
 
-  // PWA distribution (Run 3+)
+  // PWA distribution
   distributionQueue: [],
+
+  // ── Academy Linking System (Patch) ───────────────────────
+  academyLinkCode:      null,   // active client's link code
+  academyId:            null,   // active client's academy ID
+  academyStatus:        null,   // 'pending' | 'active' | 'suspended'
+  deviceIdentity:       null,   // { deviceId, linkedAt, ... }
+  linkedDevices:        [],     // devices linked to this client (admin view)
+  activationStep:       'idle', // 'idle' | 'entering' | 'validating' | 'success' | 'error'
+  activationError:      null,
 
   // UI state
   sidebarOpen: false,
@@ -99,6 +114,15 @@ export const ACTIONS = {
   SET_SIDEBAR: 'SET_SIDEBAR',
   TOGGLE_MOBILE_MENU: 'TOGGLE_MOBILE_MENU',
   SET_MOBILE_MENU: 'SET_MOBILE_MENU',
+
+  // ── Academy Linking System ────────────────────────────────
+  SET_ACADEMY_IDENTITY:   'SET_ACADEMY_IDENTITY',
+  CLEAR_ACADEMY_IDENTITY: 'CLEAR_ACADEMY_IDENTITY',
+  SET_DEVICE_IDENTITY:    'SET_DEVICE_IDENTITY',
+  SET_ACTIVATION_STEP:    'SET_ACTIVATION_STEP',
+  SET_ACTIVATION_ERROR:   'SET_ACTIVATION_ERROR',
+  UPDATE_LINKED_DEVICES:  'UPDATE_LINKED_DEVICES',
+  SET_ACADEMY_STATUS:     'SET_ACADEMY_STATUS',
 }
 
 // ─────────────────────────────────────────
@@ -106,6 +130,7 @@ export const ACTIONS = {
 // ─────────────────────────────────────────
 function appReducer(state, action) {
   switch (action.type) {
+
     case ACTIONS.SET_LOADING:
       return { ...state, isLoading: action.payload }
 
@@ -118,21 +143,33 @@ function appReducer(state, action) {
     case ACTIONS.SET_USER:
       return {
         ...state,
-        currentUser: action.payload,
+        currentUser:     action.payload,
         isAuthenticated: !!action.payload,
-        userRole: action.payload?.role || null,
+        userRole:        action.payload?.role || null,
+        // Hydrate linking fields from user object when setting user
+        academyLinkCode: action.payload?.academyLinkCode || state.academyLinkCode,
+        academyId:       action.payload?.academyId       || state.academyId,
+        academyStatus:   action.payload?.academyStatus   || state.academyStatus,
+        linkedDevices:   action.payload?.linkedDevices   || state.linkedDevices,
       }
 
     case ACTIONS.LOGOUT:
       return {
         ...state,
-        currentUser: null,
-        isAuthenticated: false,
-        userRole: null,
-        clientProfile: null,
-        activeCourseId: null,
-        activeModuleId: null,
-        activeLessonId: null,
+        currentUser:      null,
+        isAuthenticated:  false,
+        userRole:         null,
+        clientProfile:    null,
+        activeCourseId:   null,
+        activeModuleId:   null,
+        activeLessonId:   null,
+        academyLinkCode:  null,
+        academyId:        null,
+        academyStatus:    null,
+        deviceIdentity:   null,
+        linkedDevices:    [],
+        activationStep:   'idle',
+        activationError:  null,
       }
 
     case ACTIONS.SET_CLIENT_PROFILE:
@@ -199,7 +236,7 @@ function appReducer(state, action) {
     case ACTIONS.ADD_MESSAGE:
       return {
         ...state,
-        messages: [...state.messages, action.payload],
+        messages:    [...state.messages, action.payload],
         unreadCount: action.payload.from !== 'client' ? state.unreadCount + 1 : state.unreadCount
       }
 
@@ -221,7 +258,9 @@ function appReducer(state, action) {
     case ACTIONS.UPDATE_CLIENT:
       return {
         ...state,
-        allClients: state.allClients.map(c => c.id === action.payload.id ? { ...c, ...action.payload } : c)
+        allClients: state.allClients.map(c =>
+          c.id === action.payload.id ? { ...c, ...action.payload } : c
+        )
       }
 
     case ACTIONS.ADD_CLIENT:
@@ -242,13 +281,67 @@ function appReducer(state, action) {
     case ACTIONS.SET_MOBILE_MENU:
       return { ...state, mobileMenuOpen: action.payload }
 
+    // ── Academy Linking System ──────────────────────────────
+
+    case ACTIONS.SET_ACADEMY_IDENTITY:
+      return {
+        ...state,
+        academyLinkCode: action.payload.academyLinkCode,
+        academyId:       action.payload.academyId,
+        academyStatus:   action.payload.academyStatus || 'active',
+        linkedDevices:   action.payload.linkedDevices || [],
+      }
+
+    case ACTIONS.CLEAR_ACADEMY_IDENTITY:
+      return {
+        ...state,
+        academyLinkCode: null,
+        academyId:       null,
+        academyStatus:   null,
+        deviceIdentity:  null,
+        linkedDevices:   [],
+        activationStep:  'idle',
+        activationError: null,
+      }
+
+    case ACTIONS.SET_DEVICE_IDENTITY:
+      return { ...state, deviceIdentity: action.payload }
+
+    case ACTIONS.SET_ACTIVATION_STEP:
+      return { ...state, activationStep: action.payload, activationError: null }
+
+    case ACTIONS.SET_ACTIVATION_ERROR:
+      return { ...state, activationError: action.payload, activationStep: 'error' }
+
+    case ACTIONS.UPDATE_LINKED_DEVICES:
+      return {
+        ...state,
+        linkedDevices: action.payload,
+        allClients: state.allClients.map(c =>
+          c.academyLinkCode === action.payload.linkCode
+            ? { ...c, linkedDevices: action.payload.devices }
+            : c
+        )
+      }
+
+    case ACTIONS.SET_ACADEMY_STATUS:
+      return {
+        ...state,
+        academyStatus: action.payload.status,
+        allClients: state.allClients.map(c =>
+          c.id === action.payload.clientId
+            ? { ...c, academyStatus: action.payload.status }
+            : c
+        )
+      }
+
     default:
       return state
   }
 }
 
 // ─────────────────────────────────────────
-// CONTEXT
+// CONTEXT + PROVIDER
 // ─────────────────────────────────────────
 const AppContext = createContext(null)
 
@@ -257,48 +350,81 @@ export function AppProvider({ children }) {
     try {
       const persisted = localStorage.getItem('fourpaws_state')
       if (persisted) {
-        const parsed = JSON.parse(persisted)
+        const p = JSON.parse(persisted)
         return {
           ...init,
-          currentUser: parsed.currentUser || null,
-          isAuthenticated: !!parsed.currentUser,
-          userRole: parsed.currentUser?.role || null,
-          clientProfile: parsed.clientProfile || null,
-          enrolledCourses: parsed.enrolledCourses || [],
-          ownedAddons: parsed.ownedAddons || [],
-          courseProgress: parsed.courseProgress || {},
-          messages: parsed.messages || [],
-          notifications: parsed.notifications || [],
-          allClients: parsed.allClients || [],
+          currentUser:     p.currentUser     || null,
+          isAuthenticated: !!p.currentUser,
+          userRole:        p.currentUser?.role || null,
+          clientProfile:   p.clientProfile   || null,
+          enrolledCourses: p.enrolledCourses  || [],
+          ownedAddons:     p.ownedAddons      || [],
+          courseProgress:  p.courseProgress   || {},
+          messages:        p.messages         || [],
+          notifications:   p.notifications    || [],
+          allClients:      p.allClients       || [],
+          // Restore linking fields
+          academyLinkCode: p.academyLinkCode  || null,
+          academyId:       p.academyId        || null,
+          academyStatus:   p.academyStatus    || null,
+          linkedDevices:   p.linkedDevices    || [],
         }
       }
     } catch {}
     return init
   })
 
-  // Persist key state to localStorage
+  // ── Persist to localStorage ─────────────────────────────────
   useEffect(() => {
     const persistable = {
-      currentUser: state.currentUser,
-      clientProfile: state.clientProfile,
+      currentUser:     state.currentUser,
+      clientProfile:   state.clientProfile,
       enrolledCourses: state.enrolledCourses,
-      ownedAddons: state.ownedAddons,
-      courseProgress: state.courseProgress,
-      messages: state.messages,
-      notifications: state.notifications,
-      allClients: state.allClients,
+      ownedAddons:     state.ownedAddons,
+      courseProgress:  state.courseProgress,
+      messages:        state.messages,
+      notifications:   state.notifications,
+      allClients:      state.allClients,
+      // Linking fields
+      academyLinkCode: state.academyLinkCode,
+      academyId:       state.academyId,
+      academyStatus:   state.academyStatus,
+      linkedDevices:   state.linkedDevices,
     }
     localStorage.setItem('fourpaws_state', JSON.stringify(persistable))
-  }, [state.currentUser, state.clientProfile, state.enrolledCourses, state.ownedAddons, state.courseProgress, state.messages, state.notifications, state.allClients])
+  }, [
+    state.currentUser, state.clientProfile, state.enrolledCourses,
+    state.ownedAddons, state.courseProgress, state.messages,
+    state.notifications, state.allClients,
+    state.academyLinkCode, state.academyId, state.academyStatus, state.linkedDevices,
+  ])
 
-  // Helper actions
+  // ── Seed registry when allClients loads ────────────────────
+  useEffect(() => {
+    if (state.allClients.length > 0) {
+      seedRegistryFromClients(state.allClients)
+    }
+  }, [state.allClients])
+
+  // ── Sync progress to registry whenever it changes ──────────
+  useEffect(() => {
+    if (state.academyLinkCode && Object.keys(state.courseProgress).length > 0) {
+      syncProgressToRegistry(state.academyLinkCode, state.courseProgress)
+    }
+  }, [state.courseProgress, state.academyLinkCode])
+
+  // ── Helper: notify ──────────────────────────────────────────
   const notify = useCallback((message, type = 'info', duration = 4000) => {
     dispatch({ type: ACTIONS.SET_NOTIFICATION, payload: { message, type, id: Date.now() } })
     setTimeout(() => dispatch({ type: ACTIONS.CLEAR_NOTIFICATION }), duration)
   }, [])
 
   const setUser = useCallback((user) => dispatch({ type: ACTIONS.SET_USER, payload: user }), [])
-  const logout = useCallback(() => dispatch({ type: ACTIONS.LOGOUT }), [])
+
+  const logout = useCallback(() => {
+    unlinkDevice()
+    dispatch({ type: ACTIONS.LOGOUT })
+  }, [])
 
   const completeLesson = useCallback((courseId, lessonId) => {
     dispatch({ type: ACTIONS.COMPLETE_LESSON, payload: { courseId, lessonId } })
@@ -306,6 +432,25 @@ export function AppProvider({ children }) {
 
   const enrollCourse = useCallback((courseId) => {
     dispatch({ type: ACTIONS.ENROLL_COURSE, payload: courseId })
+  }, [])
+
+  // ── Helper: restore session from device identity ────────────
+  const restoreDeviceSession = useCallback(() => {
+    const identity = getLinkedDeviceIdentity()
+    const clientId = getClientIdentity()
+    if (!identity || !clientId) return false
+
+    dispatch({ type: ACTIONS.SET_DEVICE_IDENTITY, payload: identity })
+    dispatch({
+      type: ACTIONS.SET_ACADEMY_IDENTITY,
+      payload: {
+        academyLinkCode: identity.academyLinkCode,
+        academyId:       identity.academyId,
+        academyStatus:   clientId.academyStatus || 'active',
+        linkedDevices:   clientId.linkedDevices || [],
+      }
+    })
+    return true
   }, [])
 
   const value = {
@@ -316,6 +461,7 @@ export function AppProvider({ children }) {
     logout,
     completeLesson,
     enrollCourse,
+    restoreDeviceSession,
     ACTIONS,
   }
 

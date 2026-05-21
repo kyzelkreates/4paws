@@ -1,16 +1,20 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, ArrowRight, Shield } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Shield, Key } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { DEMO_CLIENTS, ADMIN_USER } from '../../data/clients'
+import {
+  seedRegistryFromClients,
+  registerClientInRegistry,
+} from '../../utils/academyIdentity'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [email,   setEmail]   = useState('')
   const [password, setPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
+  const [showPw,  setShowPw]  = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error,   setError]   = useState('')
   const navigate = useNavigate()
   const { setUser, dispatch, ACTIONS, notify } = useApp()
 
@@ -18,27 +22,39 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     await new Promise(r => setTimeout(r, 800))
 
-    // Check admin
+    // ── Admin ────────────────────────────────────────────────
     if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
       setUser(ADMIN_USER)
+      // Seed full client list + registry on admin login
       dispatch({ type: ACTIONS.SET_ALL_CLIENTS, payload: DEMO_CLIENTS })
+      seedRegistryFromClients(DEMO_CLIENTS)
       notify('Welcome back to the Control Centre', 'success')
       navigate('/admin')
       return
     }
 
-    // Check clients
+    // ── Client (email + password) ────────────────────────────
     const client = DEMO_CLIENTS.find(c => c.email === email && c.password === password)
     if (client) {
       setUser({ ...client })
-      dispatch({ type: ACTIONS.SET_CLIENT_PROFILE, payload: client })
+      dispatch({ type: ACTIONS.SET_CLIENT_PROFILE,   payload: client })
       dispatch({ type: ACTIONS.SET_ENROLLED_COURSES, payload: client.enrolledCourses })
-      dispatch({ type: ACTIONS.SET_OWNED_ADDONS, payload: client.ownedAddons })
-      dispatch({ type: ACTIONS.SET_PROGRESS, payload: client.courseProgress })
-      dispatch({ type: ACTIONS.SET_ALL_CLIENTS, payload: DEMO_CLIENTS })
+      dispatch({ type: ACTIONS.SET_OWNED_ADDONS,     payload: client.ownedAddons })
+      dispatch({ type: ACTIONS.SET_PROGRESS,         payload: client.courseProgress })
+      dispatch({ type: ACTIONS.SET_ALL_CLIENTS,      payload: DEMO_CLIENTS })
+      dispatch({
+        type: ACTIONS.SET_ACADEMY_IDENTITY,
+        payload: {
+          academyLinkCode: client.academyLinkCode,
+          academyId:       client.academyId,
+          academyStatus:   client.academyStatus,
+          linkedDevices:   client.linkedDevices || [],
+        }
+      })
+      // Ensure registry is seeded
+      seedRegistryFromClients(DEMO_CLIENTS)
       notify('Welcome back to the Academy', 'success')
       navigate('/academy')
       return
@@ -134,8 +150,19 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Activation path */}
+          <div className="mt-6 pt-6 border-t border-white/5 text-center">
+            <p className="font-sans text-xs text-silver-600 mb-3">New client with an activation code?</p>
+            <Link
+              to="/activate"
+              className="inline-flex items-center gap-2 btn-outline-gold text-xs w-full justify-center"
+            >
+              <Key size={13} /> Activate with Academy Code
+            </Link>
+          </div>
+
           {/* Demo credentials */}
-          <div className="mt-8 pt-8 border-t border-white/5">
+          <div className="mt-6 pt-6 border-t border-white/5">
             <div className="flex items-center gap-2 mb-4">
               <Shield size={12} className="text-gold-600" />
               <span className="font-sans text-[10px] tracking-widest uppercase text-silver-600">Demo Access</span>

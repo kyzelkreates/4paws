@@ -1,10 +1,16 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Plus, Trash2, Send, CheckCircle } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Send, CheckCircle, RefreshCw } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { COURSES, ADDONS, getProgressPercent } from '../../data/courses'
 import { FadeIn } from '../../components/animations/FadeIn'
+import AcademyIdentityCard from '../../components/ui/AcademyIdentityCard'
+import {
+  generateAcademyLinkCode,
+  generateAcademyId,
+  registerClientInRegistry,
+} from '../../utils/academyIdentity'
 
 export default function ClientDetailPage() {
   const { clientId } = useParams()
@@ -20,28 +26,40 @@ export default function ClientDetailPage() {
 
   const handleAssignCourse = (courseId) => {
     if (client.enrolledCourses.includes(courseId)) return
-    dispatch({
-      type: ACTIONS.UPDATE_CLIENT,
-      payload: { ...client, enrolledCourses: [...client.enrolledCourses, courseId] }
-    })
+    const updated = { ...client, enrolledCourses: [...client.enrolledCourses, courseId] }
+    dispatch({ type: ACTIONS.UPDATE_CLIENT, payload: updated })
+    registerClientInRegistry(updated)
     notify(`${COURSES.find(c => c.id === courseId)?.title} assigned.`, 'success')
   }
 
   const handleAssignAddon = (addonId) => {
     if (client.ownedAddons.includes(addonId)) return
-    dispatch({
-      type: ACTIONS.UPDATE_CLIENT,
-      payload: { ...client, ownedAddons: [...client.ownedAddons, addonId] }
-    })
-    notify(`Add-on assigned.`, 'success')
+    const updated = { ...client, ownedAddons: [...client.ownedAddons, addonId] }
+    dispatch({ type: ACTIONS.UPDATE_CLIENT, payload: updated })
+    registerClientInRegistry(updated)
+    notify('Add-on assigned.', 'success')
   }
 
   const handleRemoveCourse = (courseId) => {
-    dispatch({
-      type: ACTIONS.UPDATE_CLIENT,
-      payload: { ...client, enrolledCourses: client.enrolledCourses.filter(id => id !== courseId) }
-    })
+    const updated = { ...client, enrolledCourses: client.enrolledCourses.filter(id => id !== courseId) }
+    dispatch({ type: ACTIONS.UPDATE_CLIENT, payload: updated })
+    registerClientInRegistry(updated)
     notify('Course removed.', 'info')
+  }
+
+  const handleRegenerateCode = () => {
+    const newCode      = generateAcademyLinkCode()
+    const newAcademyId = client.academyId || generateAcademyId()
+    const updated = {
+      ...client,
+      academyLinkCode: newCode,
+      academyId:       newAcademyId,
+      academyStatus:   'pending',
+      linkedDevices:   [], // reset devices — new code, new link
+    }
+    dispatch({ type: ACTIONS.UPDATE_CLIENT, payload: updated })
+    registerClientInRegistry(updated)
+    notify(`New code generated: ${newCode}`, 'success', 6000)
   }
 
   const handleSendMessage = () => {
@@ -54,10 +72,10 @@ export default function ClientDetailPage() {
     setMessage('')
   }
 
-  const myCourses = COURSES.filter(c => client.enrolledCourses.includes(c.id))
-  const myAddons = ADDONS.filter(a => client.ownedAddons.includes(a.id))
+  const myCourses        = COURSES.filter(c => client.enrolledCourses.includes(c.id))
+  const myAddons         = ADDONS.filter(a => client.ownedAddons.includes(a.id))
   const availableCourses = COURSES.filter(c => !client.enrolledCourses.includes(c.id))
-  const availableAddons = ADDONS.filter(a => !client.ownedAddons.includes(a.id))
+  const availableAddons  = ADDONS.filter(a => !client.ownedAddons.includes(a.id))
 
   const avgProgress = myCourses.length
     ? Math.round(myCourses.reduce((acc, c) => {
@@ -66,7 +84,7 @@ export default function ClientDetailPage() {
       }, 0) / myCourses.length)
     : 0
 
-  const tabs = ['overview', 'courses', 'addons', 'messages']
+  const tabs = ['overview', 'academy', 'courses', 'addons', 'messages']
 
   return (
     <div className="min-h-screen p-6 lg:p-10 max-w-5xl mx-auto">
@@ -105,18 +123,24 @@ export default function ClientDetailPage() {
                 <div className="font-sans text-[9px] tracking-widest uppercase text-silver-700">Avg Progress</div>
                 <div className="font-sans text-xs text-gold-400">{avgProgress}%</div>
               </div>
+              {client.academyLinkCode && (
+                <div>
+                  <div className="font-sans text-[9px] tracking-widest uppercase text-silver-700">Code</div>
+                  <div className="font-mono text-xs text-gold-500">{client.academyLinkCode}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </FadeIn>
 
       {/* Tabs */}
-      <FadeIn className="flex gap-1 mb-6 border-b border-white/5 pb-0">
+      <FadeIn className="flex gap-0 mb-6 border-b border-white/5 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`font-sans text-xs tracking-widest uppercase px-4 py-3 transition-all border-b-2 -mb-px ${
+            className={`font-sans text-xs tracking-widest uppercase px-4 py-3 transition-all border-b-2 -mb-px whitespace-nowrap flex-shrink-0 ${
               activeTab === tab
                 ? 'border-gold-500 text-gold-400'
                 : 'border-transparent text-silver-600 hover:text-silver-300'
@@ -127,7 +151,7 @@ export default function ClientDetailPage() {
         ))}
       </FadeIn>
 
-      {/* Overview */}
+      {/* ── OVERVIEW ── */}
       {activeTab === 'overview' && (
         <FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -136,7 +160,7 @@ export default function ClientDetailPage() {
               {myCourses.length === 0 ? <p className="font-sans text-sm text-silver-600">No courses assigned.</p> : (
                 <div className="space-y-4">
                   {myCourses.map(c => {
-                    const p = client.courseProgress?.[c.id]
+                    const p   = client.courseProgress?.[c.id]
                     const pct = p ? getProgressPercent(c.id, p.completedLessons) : 0
                     return (
                       <div key={c.id}>
@@ -157,7 +181,7 @@ export default function ClientDetailPage() {
             <div className="glass-card p-6" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
               <div className="section-label mb-3">Notes</div>
               <p className="font-sans text-sm font-light text-silver-400 leading-relaxed">{client.notes || 'No notes yet.'}</p>
-              <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-3 text-center">
+              <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-3 gap-3 text-center">
                 <div>
                   <div className="stat-number text-xl">{client.totalMessages}</div>
                   <div className="font-sans text-[10px] text-silver-700 uppercase tracking-widest">Messages</div>
@@ -168,13 +192,53 @@ export default function ClientDetailPage() {
                   </div>
                   <div className="font-sans text-[10px] text-silver-700 uppercase tracking-widest">PWA</div>
                 </div>
+                <div>
+                  <div className="stat-number text-xl">{client.linkedDevices?.length || 0}</div>
+                  <div className="font-sans text-[10px] text-silver-700 uppercase tracking-widest">Devices</div>
+                </div>
               </div>
             </div>
           </div>
         </FadeIn>
       )}
 
-      {/* Courses tab */}
+      {/* ── ACADEMY IDENTITY TAB ── */}
+      {activeTab === 'academy' && (
+        <FadeIn>
+          <div className="space-y-4">
+            <AcademyIdentityCard client={client} />
+
+            {/* Regenerate code panel */}
+            <div className="glass-card p-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="section-label mb-2">Code Management</div>
+              <p className="font-sans text-sm font-light text-silver-500 mb-4 leading-relaxed">
+                Regenerating a code will create a new unique link code and reset all linked devices.
+                The client will need to re-activate on all their devices.
+              </p>
+              <button
+                onClick={handleRegenerateCode}
+                className="btn-outline-gold flex items-center gap-2 text-xs"
+              >
+                <RefreshCw size={13} /> Regenerate Academy Code
+              </button>
+            </div>
+
+            {/* Last activity */}
+            {client.lastActivity && (
+              <div className="glass-card p-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="section-label mb-2">Last Activity</div>
+                <p className="font-sans text-sm text-silver-300">
+                  {new Date(client.lastActivity).toLocaleString('en-GB', {
+                    dateStyle: 'long', timeStyle: 'short'
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+        </FadeIn>
+      )}
+
+      {/* ── COURSES TAB ── */}
       {activeTab === 'courses' && (
         <FadeIn>
           <div className="space-y-3 mb-6">
@@ -212,7 +276,7 @@ export default function ClientDetailPage() {
         </FadeIn>
       )}
 
-      {/* Add-ons tab */}
+      {/* ── ADD-ONS TAB ── */}
       {activeTab === 'addons' && (
         <FadeIn>
           <div className="space-y-3">
@@ -248,7 +312,7 @@ export default function ClientDetailPage() {
         </FadeIn>
       )}
 
-      {/* Messages tab */}
+      {/* ── MESSAGES TAB ── */}
       {activeTab === 'messages' && (
         <FadeIn>
           <div className="glass-card p-6 mb-4 min-h-[300px] flex flex-col" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>

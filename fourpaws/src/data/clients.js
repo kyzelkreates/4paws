@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 // DEMO CLIENT DATA — Admin Dashboard
+// Extended with Academy Identity fields (Patch: Linking System)
 // ─────────────────────────────────────────────────────────────
 
 export const DEMO_CLIENTS = [
@@ -24,7 +25,15 @@ export const DEMO_CLIENTS = [
     notes: 'Highly engaged client. Caspian making excellent progress.',
     pwaInstalled: true,
     role: 'client',
-    password: 'demo123'
+    password: 'demo123',
+    // ── Academy Identity ──────────────────────────────────────
+    academyId:           'ACM-A1B2',
+    academyLinkCode:     'FPA-ELITE-4837',
+    academyActivationKey: 'AK-VH-2024-001',
+    academyStatus:       'active',
+    linkedDevices:       [{ deviceId: 'DEV-DEMO-0001', linkedAt: '2024-01-15T10:00:00Z' }],
+    registeredAt:        '2024-01-15T09:00:00Z',
+    lastActivity:        '2024-03-20T14:20:00Z',
   },
   {
     id: 'client-2',
@@ -46,7 +55,15 @@ export const DEMO_CLIENTS = [
     notes: 'Duchess showing remarkable improvement in reactivity.',
     pwaInstalled: true,
     role: 'client',
-    password: 'demo123'
+    password: 'demo123',
+    // ── Academy Identity ──────────────────────────────────────
+    academyId:           'ACM-C3D4',
+    academyLinkCode:     'FPA-LUXE-9281',
+    academyActivationKey: 'AK-SM-2024-002',
+    academyStatus:       'active',
+    linkedDevices:       [{ deviceId: 'DEV-DEMO-0002', linkedAt: '2024-01-28T09:00:00Z' }],
+    registeredAt:        '2024-01-28T08:00:00Z',
+    lastActivity:        '2024-03-21T09:45:00Z',
   },
   {
     id: 'client-3',
@@ -69,7 +86,15 @@ export const DEMO_CLIENTS = [
     notes: 'Exceptional commitment. Atlas is a brilliant student.',
     pwaInstalled: false,
     role: 'client',
-    password: 'demo123'
+    password: 'demo123',
+    // ── Academy Identity ──────────────────────────────────────
+    academyId:           'ACM-E5F6',
+    academyLinkCode:     'FPA-GOLD-1047',
+    academyActivationKey: 'AK-AF-2024-003',
+    academyStatus:       'pending',
+    linkedDevices:       [],
+    registeredAt:        '2024-02-10T10:00:00Z',
+    lastActivity:        '2024-03-19T14:00:00Z',
   },
   {
     id: 'client-4',
@@ -91,7 +116,15 @@ export const DEMO_CLIENTS = [
     notes: 'Slower progress — may need re-engagement.',
     pwaInstalled: false,
     role: 'client',
-    password: 'demo123'
+    password: 'demo123',
+    // ── Academy Identity ──────────────────────────────────────
+    academyId:           'ACM-G7H8',
+    academyLinkCode:     'FPA-NOIR-3392',
+    academyActivationKey: 'AK-RA-2024-004',
+    academyStatus:       'pending',
+    linkedDevices:       [],
+    registeredAt:        '2024-02-20T10:00:00Z',
+    lastActivity:        '2024-03-10T11:00:00Z',
   },
   {
     id: 'client-5',
@@ -114,7 +147,15 @@ export const DEMO_CLIENTS = [
     notes: 'Fastest progressing client. Ophelia is exceptional.',
     pwaInstalled: true,
     role: 'client',
-    password: 'demo123'
+    password: 'demo123',
+    // ── Academy Identity ──────────────────────────────────────
+    academyId:           'ACM-I9J0',
+    academyLinkCode:     'FPA-APEX-7756',
+    academyActivationKey: 'AK-IB-2024-005',
+    academyStatus:       'active',
+    linkedDevices:       [{ deviceId: 'DEV-DEMO-0005', linkedAt: '2024-03-01T08:00:00Z' }],
+    registeredAt:        '2024-03-01T07:00:00Z',
+    lastActivity:        '2024-03-22T08:00:00Z',
   }
 ]
 
