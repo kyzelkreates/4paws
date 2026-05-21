@@ -1,7 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// SESSION RESTORE HOOK
-// Called once on app mount. Checks whether this device is already
-// linked to an academy profile and silently restores the session.
+// SESSION RESTORE HOOK — extended with AI memory restoration
 // ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from 'react'
 import { useApp } from '../context/AppContext'
@@ -11,34 +9,29 @@ import {
   lookupByLinkCode,
   syncProgressToRegistry,
 } from '../utils/academyIdentity'
+import {
+  loadAIMemory,
+  isOnboardingComplete,
+} from '../ai/aiMemory'
+import { scoreBehaviour, recommendCourses, recommendAddons, generateBehaviourInsight, getDailyPrompt } from '../ai/behaviourEngine'
+import { generateEnrichmentPlan } from '../ai/aiMemory'
 
 export function useSessionRestore() {
   const { state, dispatch, ACTIONS, setUser } = useApp()
   const [restoring, setRestoring] = useState(true)
 
   useEffect(() => {
-    // Only run if not already authenticated
-    if (state.isAuthenticated) {
-      setRestoring(false)
-      return
-    }
+    if (state.isAuthenticated) { setRestoring(false); return }
 
     const deviceIdentity = getLinkedDeviceIdentity()
     const clientIdentity = getClientIdentity()
 
-    if (!deviceIdentity || !clientIdentity) {
-      setRestoring(false)
-      return
-    }
+    if (!deviceIdentity || !clientIdentity) { setRestoring(false); return }
 
-    // Re-validate the link code still exists in the registry
     const registryEntry = lookupByLinkCode(deviceIdentity.academyLinkCode)
-    if (!registryEntry || registryEntry.academyStatus === 'suspended') {
-      setRestoring(false)
-      return
-    }
+    if (!registryEntry || registryEntry.academyStatus === 'suspended') { setRestoring(false); return }
 
-    // Restore session silently ─────────────────────────────
+    // Restore auth session
     const restoredUser = {
       id:              clientIdentity.clientId,
       name:            clientIdentity.name,
@@ -47,9 +40,9 @@ export function useSessionRestore() {
       academyId:       clientIdentity.academyId,
       academyLinkCode: clientIdentity.academyLinkCode,
       academyStatus:   registryEntry.academyStatus,
-      enrolledCourses: registryEntry.enrolledCourses  || clientIdentity.enrolledCourses  || [],
-      ownedAddons:     registryEntry.ownedAddons      || clientIdentity.ownedAddons      || [],
-      courseProgress:  registryEntry.courseProgress   || clientIdentity.courseProgress   || {},
+      enrolledCourses: registryEntry.enrolledCourses  || [],
+      ownedAddons:     registryEntry.ownedAddons      || [],
+      courseProgress:  registryEntry.courseProgress   || {},
       linkedDevices:   registryEntry.linkedDevices    || [],
     }
 
@@ -69,13 +62,38 @@ export function useSessionRestore() {
       }
     })
 
-    // Re-sync any local progress that happened offline
+    // Restore AI memory
+    const aiMemory = loadAIMemory()
+    if (aiMemory.dogProfile) {
+      dispatch({ type: ACTIONS.SET_DOG_PROFILE, payload: aiMemory.dogProfile })
+    }
+    if (aiMemory.behaviourScores) {
+      dispatch({ type: ACTIONS.SET_BEHAVIOUR_SCORES, payload: aiMemory.behaviourScores })
+    }
+    if (aiMemory.aiRecommendations) {
+      dispatch({ type: ACTIONS.SET_AI_RECOMMENDATIONS, payload: aiMemory.aiRecommendations })
+    }
+    if (aiMemory.onboardingCompleted) {
+      dispatch({ type: ACTIONS.SET_ONBOARDING_DONE })
+    }
+
+    // Re-generate daily insights
+    if (aiMemory.dogProfile) {
+      const scores  = aiMemory.behaviourScores || scoreBehaviour(aiMemory.dogProfile)
+      const insight = generateBehaviourInsight(aiMemory.dogProfile.name, scores)
+      const dailyPrompt = getDailyPrompt(aiMemory.dogProfile.name)
+      dispatch({
+        type: ACTIONS.SET_TRAINING_INSIGHTS,
+        payload: { insight, dailyPrompt }
+      })
+    }
+
     if (Object.keys(restoredUser.courseProgress).length > 0) {
       syncProgressToRegistry(clientIdentity.academyLinkCode, restoredUser.courseProgress)
     }
 
     setRestoring(false)
-  }, []) // run once on mount
+  }, [])
 
   return { restoring }
 }
