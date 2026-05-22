@@ -6,6 +6,8 @@ import { useApp } from '../../context/AppContext'
 import { useAI } from '../../hooks/useAI'
 import { getCourseById } from '../../data/courses'
 import { FadeIn } from '../../components/animations/FadeIn'
+import { MilestoneReveal } from '../../components/ui/PageTransition'
+import { SOUNDS } from '../../ai/intelligenceCore'
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams()
@@ -35,6 +37,7 @@ export default function LessonPage() {
   if (!lesson) return <div className="p-10 text-silver-500 text-center">Lesson not found.</div>
 
   const handleComplete = () => {
+    SOUNDS.complete()
     if (!isAlreadyDone) {
       completeLesson(courseId, lessonId)
       const hit = checkMilestone()
