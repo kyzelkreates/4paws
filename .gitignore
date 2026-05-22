@@ -1,1 +1,3 @@
 .agents/.env
+fourpaws/node_modules/
+fourpaws/dist/

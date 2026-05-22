@@ -4,19 +4,19 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "node node_modules/vite/dist/node/cli.js",
+    "build": "node node_modules/vite/dist/node/cli.js build",
+    "preview": "node node_modules/vite/dist/node/cli.js preview",
     "prebuild": "node build/firewall/mockDataGuard.js",
-    "build:strict": "NODE_ENV=production FP_ENFORCE_FIREWALL=1 node build/firewall/mockDataGuard.js --production && FP_ENFORCE_FIREWALL=1 vite build",
+    "build:strict": "NODE_ENV=production FP_ENFORCE_FIREWALL=1 node build/firewall/mockDataGuard.js --production && FP_ENFORCE_FIREWALL=1 node node_modules/vite/dist/node/cli.js build",
     "build:check": "node build/firewall/mockDataGuard.js --production"
   },
   "dependencies": {
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
-    "framer-motion": "^11.0.0",
-    "lucide-react": "^0.344.0",
     "recharts": "^2.12.0"
   },
   "devDependencies": {
