@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useApp } from '../../context/AppContext'
 import { CheckCircle, AlertCircle, Info, X, Brain } from 'lucide-react'
 import { SOUNDS } from '../../ai/intelligenceCore'
+import { filterNotification, purifyText } from '../../ai/narrativeVoice'
 
 const CONFIG = {
   success: {
@@ -31,7 +32,7 @@ const CONFIG = {
     iconColour:  '#C9A84C',
     border:      'rgba(201,168,76,0.3)',
     glow:        'rgba(201,168,76,0.06)',
-    label:       'Intelligence Core',
+    label:       '',
     sound:       'notification',
   },
   intelligence: {
@@ -39,7 +40,7 @@ const CONFIG = {
     iconColour:  '#8B5CF6',
     border:      'rgba(139,92,246,0.3)',
     glow:        'rgba(139,92,246,0.06)',
-    label:       'Intelligence Core',
+    label:       '',
     sound:       'notification',
   },
 }
@@ -103,7 +104,7 @@ export default function GlobalNotification() {
                     <div className="font-sans text-[8px] uppercase tracking-[0.3em] mb-1"
                       style={{ color: cfg.iconColour }}>{cfg.label}</div>
                     <p className="font-sans text-xs font-light text-silver-300 leading-relaxed">
-                      {notification.message}
+                      {purifyText(notification.message || '')}
                     </p>
                   </div>
                   <button

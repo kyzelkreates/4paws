@@ -14,6 +14,7 @@ import {
 import { detectTransformationStage, FOUR_PAWS_METHOD } from '../../ai/fourPawsMethod'
 import { loadAIMemory } from '../../ai/aiMemory'
 import { SOUNDS } from '../../ai/intelligenceCore'
+import { purifyText } from '../../ai/narrativeVoice'
 import { FadeIn } from '../../components/animations/FadeIn'
 import { AmbientOrbs } from '../../components/ui/PageTransition'
 import { speak, VOICE_COACH_AVAILABLE } from '../../ai/voiceCoach'
@@ -51,7 +52,7 @@ function MessageBubble({ message, dogName }) {
       <div className={`max-w-[80%] ${isUser ? 'ml-auto' : ''}`}>
         {!isUser && (
           <div className="font-sans text-[7px] uppercase tracking-[0.3em] text-gold-700 mb-1">
-            {dogName ? `${dogName}'s Academy` : 'Intelligence Core'}
+            {dogName ? `${dogName}'s Academy` : 'Your Academy'}
           </div>
         )}
         <div className={`px-4 py-3 font-sans text-sm font-light leading-relaxed ${
@@ -154,7 +155,7 @@ export default function CompanionChat() {
 
     // Simulate thinking delay
     setTimeout(() => {
-      const response = generateCompanionResponse(content, context)
+      const response = purifyText(generateCompanionResponse(content, context))
       const aiMsg = { id: `a-${Date.now()}`, role: 'assistant', content: response, timestamp: new Date().toISOString() }
       setMessages(prev => [...prev, aiMsg])
       saveChatMessage(aiMsg)
@@ -184,7 +185,7 @@ export default function CompanionChat() {
               <div className="flex items-center gap-1.5">
                 <motion.div className="w-1 h-1 rounded-full bg-emerald-500"
                   animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} />
-                <span className="font-sans text-[9px] text-silver-600">{dogName}'s AI — always available</span>
+                <span className="font-sans text-[9px] text-silver-600">always available for {dogName}</span>
               </div>
             </div>
             <button onClick={() => { setMessages([]); clearChatHistory() }}
@@ -242,7 +243,7 @@ export default function CompanionChat() {
           </button>
         </div>
         <p className="font-sans text-[8px] text-silver-800 mt-2 text-center">
-          Intelligence powered by The Four Paws Method™ · Fully offline
+          The Four Paws Method™ · Fully offline
         </p>
       </div>
     </div>

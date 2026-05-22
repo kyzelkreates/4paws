@@ -147,7 +147,7 @@ export function IntelligenceLoader({ label = 'Analysing intelligence profile…'
         <motion.p
           className="font-sans text-[10px] text-silver-600 tracking-widest uppercase text-center"
           animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
           {label}
         </motion.p>

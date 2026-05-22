@@ -20,6 +20,7 @@ import {
   hasNarrativeBeenSeen,
 } from '../ai/intelligenceCore'
 import { loadAIMemory, loadStreak } from '../ai/aiMemory'
+import { buildSingleSurface } from '../ai/narrativeVoice'
 
 export function useIntelligenceCore() {
   const { state }         = useApp()
@@ -57,6 +58,12 @@ export function useIntelligenceCore() {
   const narrateWeek = useCallback((score) =>
     generateWeeklyNarrative(dog?.name, score),
     [dog?.name]
+  )
+
+  // ── Single-surface narrative output (ODIN doctrine) ───────
+  const surface = useMemo(() =>
+    buildSingleSurface(core, core?.behaviourScores, core?.emotionalState, streak, dog?.name),
+    [core?.dogName, core?.behaviourScores, core?.emotionalState, streak]
   )
 
   // ── Sound helpers ─────────────────────────────────────────

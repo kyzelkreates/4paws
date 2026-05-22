@@ -1,186 +1,141 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// FOUR PAWS — ACADEMY DASHBOARD
+// ODIN DOCTRINE: Noiseless. Single insight. One voice. Three surfaces.
+//
+// What this screen answers:
+//   1. What is happening with my dog right now?
+//   2. What should I do next?
+//   3. How is my programme progressing?
+//
+// Nothing else is shown. Nothing else is needed.
+// ─────────────────────────────────────────────────────────────────────────────
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  BookOpen, CheckCircle, Lock, Play, ArrowRight,
-  Flame, AlertTriangle, BarChart2, MapPin,
-  Clock, Award, Sparkles, Volume2, Bell, Activity, Brain,
-  ChevronRight, Star, Zap, Wind,
-} from 'lucide-react'
+import { Play, Lock, CheckCircle, Volume2, ArrowRight, Flame } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { useIntelligenceCore } from '../../hooks/useIntelligenceCore'
 import { useAcademyConfig } from '../../context/AcademyConfigContext'
 import { COURSES, getTotalLessons } from '../../data/courses'
-import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
-import { AmbientOrbs, IntelligenceLoader, MilestoneReveal, CardEntrance } from '../../components/ui/PageTransition'
-import { speak, isVoiceEnabled, VOICE_COACH_AVAILABLE } from '../../ai/voiceCoach'
-import { EMOTIONAL_STATES } from '../../ai/emotionalEngine'
+import { FadeIn } from '../../components/animations/FadeIn'
+import { AmbientOrbs, IntelligenceLoader, MilestoneReveal } from '../../components/ui/PageTransition'
+import { speak, VOICE_COACH_AVAILABLE } from '../../ai/voiceCoach'
 import { SOUNDS } from '../../ai/intelligenceCore'
+import { buildSingleSurface, MOTION } from '../../ai/narrativeVoice'
+import { EMOTIONAL_STATES } from '../../ai/emotionalEngine'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EMOTIONAL STATE ORB
+// COMPANION ORB — the living emotional centre
+// Calm, breathing presence. Not a data widget.
 // ─────────────────────────────────────────────────────────────────────────────
-function EmotionalOrb({ emotionalState, size = 48 }) {
-  const state = emotionalState || EMOTIONAL_STATES.UNCERTAIN
+function CompanionOrb({ emotionalState, dogName }) {
+  const es = emotionalState || EMOTIONAL_STATES.UNCERTAIN
   return (
-    <motion.div
-      className="relative flex items-center justify-center flex-shrink-0"
-      style={{ width: size, height: size }}
-    >
-      <motion.div className="absolute inset-0 rounded-full"
-        style={{ background: `radial-gradient(circle, ${state.glow} 0%, transparent 70%)` }}
-        animate={{ scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <div className="relative z-10 rounded-full flex items-center justify-center"
-        style={{ width: size * 0.75, height: size * 0.75, background: `${state.colour}15`, border: `1px solid ${state.colour}40` }}>
-        <span style={{ fontSize: size * 0.32 }}>{state.icon}</span>
+    <div className="flex flex-col items-center gap-3">
+      {/* Outer breathing ring */}
+      <div className="relative" style={{ width: 80, height: 80 }}>
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ background: `radial-gradient(circle, ${es.glow} 0%, transparent 70%)` }}
+          animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0.9, 0.5] }}
+          transition={{ duration: MOTION.ambient.duration, repeat: Infinity, ease: MOTION.ambient.ease }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ border: `1px solid ${es.colour}25` }}
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
+        <div className="absolute inset-3 rounded-full flex items-center justify-center"
+          style={{ background: `${es.colour}10`, border: `1px solid ${es.colour}30` }}>
+          <span style={{ fontSize: 26 }}>{es.icon}</span>
+        </div>
       </div>
-    </motion.div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INTELLIGENCE PULSE BADGE
-// ─────────────────────────────────────────────────────────────────────────────
-function IntelligencePulse({ label, value, colour = '#C9A84C', icon }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <motion.div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-        style={{ background: colour, boxShadow: `0 0 6px ${colour}80` }}
-        animate={{ scale: [1, 1.5, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 2, repeat: Infinity }} />
-      <div>
-        <div className="font-sans text-[8px] text-silver-700 uppercase tracking-widest">{label}</div>
-        <div className="font-mono text-xs font-medium" style={{ color: colour }}>{value}</div>
+      {/* Emotional state label — quiet, secondary */}
+      <div className="text-center">
+        <div className="font-sans text-[9px] font-medium tracking-widest uppercase"
+          style={{ color: es.colour }}>{es.label}</div>
+        {dogName && (
+          <div className="font-sans text-[8px] text-silver-700 mt-0.5">{dogName}</div>
+        )}
       </div>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONCIERGE GREETING BLOCK
+// PRIMARY INTELLIGENCE SURFACE
+// One insight. One action. One optional observation.
+// This is the entire intelligence output for the session.
 // ─────────────────────────────────────────────────────────────────────────────
-function ConciergeGreeting({ core, tierMeta, can }) {
-  const [voiceActive, setVoiceActive] = useState(false)
-
-  const handleVoice = useCallback(() => {
-    if (!VOICE_COACH_AVAILABLE) return
-    setVoiceActive(true)
-    speak(`${core.greeting}. ${core.narrative.coaching || ''}`)
-    setTimeout(() => setVoiceActive(false), 4000)
-  }, [core.greeting, core.narrative?.coaching])
+function IntelligenceSurface({ surface, greeting, voiceEnabled, onVoice, voiceActive }) {
+  if (!surface) return null
 
   return (
     <FadeIn>
       <div className="relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(201,168,76,0.07) 0%, rgba(201,168,76,0.02) 60%, transparent 100%)',
-          border: '1px solid rgba(201,168,76,0.15)',
+          background: 'linear-gradient(160deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 50%, transparent 100%)',
+          border: '1px solid rgba(201,168,76,0.12)',
         }}>
-        {/* Ambient glow */}
-        <div className="absolute top-0 right-0 w-72 h-72 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
-        {/* Top accent line */}
+        {/* Gold accent line */}
         <div className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent)' }} />
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.45), transparent)' }} />
 
-        <div className="relative z-10 p-7 lg:p-10">
-          <div className="flex items-start gap-6 flex-wrap lg:flex-nowrap">
-
-            {/* Emotional orb */}
-            {core.emotionalState && (
-              <div className="flex-shrink-0">
-                <EmotionalOrb emotionalState={core.emotionalState} size={64} />
-              </div>
-            )}
-
-            {/* Text */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-px w-6" style={{ background: tierMeta?.colour || '#C9A84C' }} />
-                <span className="font-sans text-[9px] uppercase tracking-[0.3em]" style={{ color: tierMeta?.colour || '#C9A84C' }}>
-                  {core.tier?.name || 'Intelligence Core'}
-                </span>
-              </div>
-
-              <h2 className="font-display text-2xl lg:text-3xl font-light text-pearl mb-2 leading-snug">
-                {core.narrative.greeting}
+        <div className="p-6 lg:p-8">
+          {/* Greeting — quiet, personal */}
+          {greeting && (
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <h2 className="font-display text-xl lg:text-2xl font-light text-pearl leading-snug flex-1">
+                {greeting}
               </h2>
-
-              {core.narrative.coaching && (
-                <motion.p
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="font-sans text-sm font-light text-silver-400 leading-relaxed mb-4 max-w-2xl">
-                  {core.narrative.coaching}
-                </motion.p>
-              )}
-
-              {/* Narrative insight */}
-              {core.narrative.primary && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  className="flex items-start gap-3 p-4 mb-4"
-                  style={{ background: 'rgba(201,168,76,0.04)', borderLeft: '2px solid rgba(201,168,76,0.3)' }}>
-                  <Brain size={13} className="text-gold-600 flex-shrink-0 mt-0.5" />
-                  <p className="font-sans text-xs text-silver-400 font-light leading-relaxed italic">
-                    {core.narrative.primary}
-                  </p>
-                </motion.div>
-              )}
-
-              {/* Intelligence readouts */}
-              {core.intScores && (
-                <div className="flex flex-wrap gap-5">
-                  {[
-                    { label: 'Confidence', value: `${core.intScores.confidence}%`, colour: '#10B981' },
-                    { label: 'Stability',  value: `${core.intScores.stability}%`,  colour: '#C9A84C' },
-                    { label: 'Social',     value: `${core.intScores.social}%`,     colour: '#8B5CF6' },
-                    { label: 'Streak',     value: `${core.streak?.current || 0}d`, colour: '#F59E0B' },
-                  ].map(p => (
-                    <IntelligencePulse key={p.label} {...p} />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Voice + Alerts */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {VOICE_COACH_AVAILABLE && can.voiceCoach && (
-                <motion.button onClick={handleVoice} whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300"
+              {voiceEnabled && (
+                <motion.button
+                  onClick={onVoice}
+                  whileTap={MOTION.tap}
+                  className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                   style={{
-                    borderColor: voiceActive ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.1)',
-                    background: voiceActive ? 'rgba(201,168,76,0.1)' : 'transparent',
+                    border: `1px solid ${voiceActive ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                    background: voiceActive ? 'rgba(201,168,76,0.08)' : 'transparent',
                   }}>
-                  <Volume2 size={14} className={voiceActive ? 'text-gold-400' : 'text-silver-600'} />
+                  <Volume2 size={12} style={{ color: voiceActive ? '#C9A84C' : 'rgba(255,255,255,0.35)' }} />
                 </motion.button>
               )}
             </div>
+          )}
+
+          {/* Insight */}
+          <div className="mb-4">
+            <div className="font-sans text-[8px] uppercase tracking-[0.4em] text-gold-700 mb-2">Insight</div>
+            <p className="font-sans text-sm text-silver-300 font-light leading-relaxed">
+              {surface.insight}
+            </p>
           </div>
 
-          {/* Emotional state label */}
-          {core.emotionalState && core.emotionalState.id !== 'uncertain' && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-              className="mt-5 pt-5 border-t border-white/5 flex items-center gap-3">
-              <span className="font-sans text-[9px] uppercase tracking-widest text-silver-700">Emotional Status</span>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: core.emotionalState.colour, boxShadow: `0 0 4px ${core.emotionalState.colour}` }} />
-                <span className="font-sans text-[10px] font-medium" style={{ color: core.emotionalState.colour }}>
-                  {core.emotionalState.label}
-                </span>
+          {/* Divider */}
+          <div className="h-px mb-4"
+            style={{ background: 'linear-gradient(90deg, rgba(201,168,76,0.15), transparent)' }} />
+
+          {/* Recommendation */}
+          <div className="mb-4">
+            <div className="font-sans text-[8px] uppercase tracking-[0.4em] text-gold-700 mb-2">Recommendation</div>
+            <p className="font-sans text-sm text-silver-400 font-light leading-relaxed">
+              {surface.action}
+            </p>
+          </div>
+
+          {/* Observation — only shown when meaningful */}
+          {surface.observation && (
+            <>
+              <div className="h-px mb-4"
+                style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.05), transparent)' }} />
+              <div>
+                <div className="font-sans text-[8px] uppercase tracking-[0.4em] text-silver-700 mb-2">Observation</div>
+                <p className="font-sans text-xs text-silver-500 font-light leading-relaxed italic">
+                  {surface.observation}
+                </p>
               </div>
-              <span className="font-sans text-[10px] text-silver-600 font-light">—</span>
-              <span className="font-sans text-[10px] text-silver-600 font-light italic">{core.emotionalState.desc}</span>
-            </motion.div>
+            </>
           )}
         </div>
       </div>
@@ -189,157 +144,112 @@ function ConciergeGreeting({ core, tierMeta, can }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ALERT PANEL
+// NEXT LESSON — the single most important programme action
+// Minimal. Direct. No progress bars on this surface.
 // ─────────────────────────────────────────────────────────────────────────────
-function AlertPanel({ alert }) {
-  if (!alert) return null
+function NextLessonCard({ courses, progress, onNavigate }) {
+  // Find the single most relevant next lesson
+  const nextItem = useMemo(() => {
+    for (const course of courses) {
+      const prog          = progress[course.id] || { completedLessons: [] }
+      const totalLessons  = getTotalLessons(course)
+      const completed     = prog.completedLessons?.length || 0
+      if (completed < totalLessons) {
+        const nextModule = course.modules?.find(m =>
+          !m.lessons.every(l => prog.completedLessons.includes(l.id))
+        )
+        const nextLesson = nextModule?.lessons.find(l => !prog.completedLessons.includes(l.id))
+        if (nextLesson) {
+          return { course, nextLesson, completed, totalLessons, percent: Math.round((completed / totalLessons) * 100) }
+        }
+      }
+    }
+    return null
+  }, [courses, progress])
+
+  if (!nextItem) return null
+
+  const { course, nextLesson, percent } = nextItem
+
+  return (
+    <FadeIn delay={0.1}>
+      <motion.div
+        className="relative overflow-hidden cursor-pointer"
+        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+        whileHover={{ borderColor: 'rgba(201,168,76,0.3)', ...MOTION.hover }}
+        whileTap={MOTION.tap}
+        onClick={() => onNavigate(course.id, nextLesson.id)}
+      >
+        <div className={`h-px bg-gradient-to-r ${course.color}`} />
+        <div className="p-5 flex items-center gap-4">
+          <span className="text-2xl flex-shrink-0">{course.icon}</span>
+          <div className="flex-1 min-w-0">
+            <div className="font-sans text-[8px] uppercase tracking-[0.35em] text-silver-700 mb-0.5">Continue</div>
+            <div className="font-serif text-sm font-medium text-pearl truncate">{nextLesson.title}</div>
+            <div className="font-sans text-[10px] text-silver-600 truncate">{course.title}</div>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-3">
+            <span className="font-mono text-[10px] text-gold-500">{percent}%</span>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)' }}>
+              <Play size={11} className="text-gold-500" style={{ marginLeft: 1 }} fill="currentColor" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </FadeIn>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AVAILABLE COURSE — minimal teaser
+// ─────────────────────────────────────────────────────────────────────────────
+function AvailableCourseCard({ course, index }) {
+  const navigate = useNavigate()
   return (
     <motion.div
-      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-      className={`flex items-start gap-3 p-4 border ${alert.bgColour || 'bg-amber-500/5'} ${alert.border || 'border-amber-500/20'}`}>
-      <span className="text-base flex-shrink-0 mt-0.5">{alert.icon}</span>
+      className="flex items-center gap-3 p-4 cursor-pointer"
+      style={{ border: '1px solid rgba(255,255,255,0.04)' }}
+      whileHover={{ borderColor: 'rgba(201,168,76,0.2)', ...MOTION.hover }}
+      whileTap={MOTION.tap}
+      onClick={() => { SOUNDS.tap(); navigate(`/academy/course/${course.id}`) }}
+    >
+      <span className="text-xl flex-shrink-0">{course.icon}</span>
       <div className="flex-1 min-w-0">
-        <div className={`font-sans text-[9px] font-semibold uppercase tracking-widest mb-1 ${alert.colour || 'text-amber-400'}`}>
-          {alert.title}
-        </div>
-        <p className="font-sans text-xs text-silver-400 font-light leading-relaxed">{alert.summary}</p>
+        <div className="font-serif text-xs font-medium text-silver-400 truncate">{course.title}</div>
+        <div className="font-sans text-[9px] text-silver-700 truncate">{course.duration}</div>
       </div>
+      <Lock size={10} className="text-silver-800 flex-shrink-0" />
     </motion.div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COURSE CARD
+// QUIET STATS — two numbers only. No grid of four.
 // ─────────────────────────────────────────────────────────────────────────────
-function CourseCard({ course, progress, isEnrolled, onNavigate, index = 0 }) {
-  const completedLessons = progress?.completedLessons || []
-  const totalLessons     = getTotalLessons(course)
-  const percent          = Math.round((completedLessons.length / totalLessons) * 100)
-  const nextModule       = course.modules?.find(m => !m.lessons.every(l => completedLessons.includes(l.id)))
-  const nextLesson       = nextModule?.lessons.find(l => !completedLessons.includes(l.id))
-
-  return (
-    <CardEntrance index={index}>
-      <motion.div
-        whileHover={{ y: -3, borderColor: 'rgba(201,168,76,0.35)' }}
-        className="glass-card overflow-hidden cursor-pointer h-full"
-        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-        onClick={() => isEnrolled && onNavigate(course.id, nextLesson?.id)}
-      >
-        <div className={`h-px bg-gradient-to-r ${course.color}`} />
-
-        <div className="p-5">
-          <div className="flex items-start gap-3 mb-4">
-            <span className="text-3xl flex-shrink-0">{course.icon}</span>
-            <div className="flex-1 min-w-0">
-              <div className="font-serif text-base font-medium text-pearl mb-0.5 leading-snug">{course.title}</div>
-              <div className="font-sans text-[10px] text-silver-600 font-light">{course.subtitle}</div>
-            </div>
-            {!isEnrolled && <Lock size={12} className="text-silver-800 flex-shrink-0 mt-1" />}
-          </div>
-
-          {isEnrolled && (
-            <>
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-sans text-[9px] text-silver-700 uppercase tracking-widest">Progress</span>
-                  <span className="font-mono text-[10px] text-gold-500">{percent}%</span>
-                </div>
-                <div className="progress-bar">
-                  <motion.div className="progress-fill"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percent}%` }}
-                    transition={{ duration: 1.3, delay: index * 0.1, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-[9px] text-silver-700">{completedLessons.length}/{totalLessons} lessons</span>
-                {percent === 100
-                  ? <span className="flex items-center gap-1 font-sans text-[9px] text-emerald-400"><CheckCircle size={10} /> Complete</span>
-                  : <button className="flex items-center gap-1 font-sans text-[10px] text-gold-500 hover:text-gold-300 transition-colors">
-                      <Play size={9} fill="currentColor" /> Continue
-                    </button>
-                }
-              </div>
-            </>
-          )}
-          {!isEnrolled && (
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-[9px] text-silver-600">{course.duration}</span>
-              <span className="font-sans text-[9px] text-gold-700 font-medium">{course.price}</span>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </CardEntrance>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DAILY INSIGHT CARD
-// ─────────────────────────────────────────────────────────────────────────────
-function DailyInsightCard({ insight }) {
-  if (!insight) return null
+function QuietStats({ streak, completedLessons }) {
+  if (!streak && !completedLessons) return null
   return (
     <FadeIn delay={0.3}>
-      <div className="relative overflow-hidden p-6"
-        style={{
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(139,92,246,0.02) 100%)',
-          border: '1px solid rgba(139,92,246,0.2)',
-        }}>
-        <div className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent)' }} />
-        <div className="flex items-start gap-3">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.3)' }}>
-            <Brain size={13} className="text-purple-400" />
+      <div className="flex items-center gap-5 py-4 border-t border-white/[0.04]">
+        {streak?.current > 0 && (
+          <div className="flex items-center gap-2">
+            <Flame size={11} className="text-amber-500" />
+            <span className="font-sans text-[10px] text-silver-500">
+              <span className="font-mono text-sm text-amber-400">{streak.current}</span>
+              <span className="text-silver-700 ml-1">day streak</span>
+            </span>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-sans text-[8px] uppercase tracking-[0.3em] text-purple-500 mb-1.5">Intelligence Core · Daily Insight</div>
-            <p className="font-sans text-sm font-light text-silver-300 leading-relaxed italic">
-              {insight}
-            </p>
+        )}
+        {completedLessons > 0 && (
+          <div className="flex items-center gap-2">
+            <CheckCircle size={11} className="text-emerald-500" />
+            <span className="font-sans text-[10px] text-silver-500">
+              <span className="font-mono text-sm text-emerald-400">{completedLessons}</span>
+              <span className="text-silver-700 ml-1">lessons completed</span>
+            </span>
           </div>
-        </div>
-      </div>
-    </FadeIn>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// QUICK NAVIGATION GRID
-// ─────────────────────────────────────────────────────────────────────────────
-function QuickNavGrid({ navItems, can }) {
-  const navigate = useNavigate()
-  const highlights = [
-    { to: '/academy/wellness',  icon: '✨', label: 'Wellness',    feature: 'wellness_full'      },
-    { to: '/academy/passport',  icon: '🪪', label: 'Passport',    feature: 'passport'            },
-    { to: '/academy/journal',   icon: '📖', label: 'Journal',     feature: 'journal'             },
-    { to: '/academy/twin',      icon: '🤖', label: 'Digital Twin',feature: 'digital_twin'        },
-    { to: '/academy/calm',      icon: '🌸', label: 'Calm Centre', feature: 'calm_centre'         },
-    { to: '/academy/map',       icon: '🗺️', label: 'Journey',     feature: 'transformation_map'  },
-    { to: '/academy/stability', icon: '🛡️', label: 'Stability',   feature: 'stability_dashboard' },
-    { to: '/academy/emergency', icon: '🚨', label: 'Emergency',   feature: 'emergency'           },
-  ].filter(item => can.feature(item.feature))
-
-  return (
-    <FadeIn delay={0.2}>
-      <div>
-        <div className="font-sans text-[9px] uppercase tracking-[0.3em] text-silver-700 mb-3">Quick Access</div>
-        <div className="grid grid-cols-4 gap-2">
-          {highlights.slice(0, 8).map((item, i) => (
-            <motion.button key={item.to}
-              onClick={() => { SOUNDS.tap(); navigate(item.to) }}
-              whileHover={{ y: -2, borderColor: 'rgba(201,168,76,0.35)' }}
-              whileTap={{ scale: 0.96 }}
-              className="flex flex-col items-center gap-1.5 p-3 border border-white/5 transition-all duration-200 hover:bg-gold-500/4"
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-sans text-[8px] text-silver-600 uppercase tracking-widest leading-tight text-center">{item.label}</span>
-            </motion.button>
-          ))}
-        </div>
+        )}
       </div>
     </FadeIn>
   )
@@ -351,268 +261,146 @@ function QuickNavGrid({ navItems, can }) {
 export default function AcademyDashboard() {
   const { state }   = useApp()
   const navigate    = useNavigate()
-  const { can, tierMeta, packageMeta, navItems, motionLevel } = useAcademyConfig()
+  const { can, tierMeta } = useAcademyConfig()
   const intelligence = useIntelligenceCore()
+  const [milestone,   setMilestone]   = useState(null)
+  const [voiceActive, setVoiceActive] = useState(false)
 
-  const [milestone, setMilestone] = useState(null)
+  const { enrolledCourses, courseProgress, dogProfile } = state
+  const { core, ready, behaviourScores, emotionalState, streak } = intelligence
 
-  const { enrolledCourses, courseProgress } = state
-  const { core, ready, behaviourScores, emotionalState, alerts, achievements, streak, narrative } = intelligence
+  const myCourses       = COURSES.filter(c => enrolledCourses.includes(c.id))
+  const availableCourses = COURSES.filter(c => !enrolledCourses.includes(c.id)).slice(0, 2)
 
-  const myCoursesData      = COURSES.filter(c => enrolledCourses.includes(c.id))
-  const availableCourses   = COURSES.filter(c => !enrolledCourses.includes(c.id)).slice(0, 2)
-  const topAlert           = alerts[0] || null
+  const completedLessons = Object.values(courseProgress || {})
+    .reduce((a, p) => a + (p.completedLessons?.length || 0), 0)
 
+  // Build the single-surface intelligence output
+  const surface = useMemo(() =>
+    buildSingleSurface(core, behaviourScores, emotionalState, streak, core?.dogName),
+    [core?.dogName, behaviourScores, emotionalState, streak]
+  )
+
+  // Voice narration of the insight + action
+  const handleVoice = useCallback(() => {
+    if (!VOICE_COACH_AVAILABLE || !surface) return
+    setVoiceActive(true)
+    const script = [
+      core?.narrative?.greeting || '',
+      surface.insight,
+      surface.action,
+    ].filter(Boolean).join('. ')
+    speak(script)
+    setTimeout(() => setVoiceActive(false), 8000)
+  }, [surface, core?.narrative?.greeting])
+
+  // Milestone detection — minimal, only on 5-lesson intervals
+  useEffect(() => {
+    if (!core || completedLessons === 0) return
+    if (completedLessons % 5 !== 0) return
+    const key = `fp_milestone_shown_${completedLessons}`
+    if (localStorage.getItem(key)) return
+    setTimeout(() => {
+      setMilestone({
+        title: core.dogName ? `${core.dogName}'s Progress` : 'A Milestone Reached',
+        subtitle: `${core.dogName || 'Your companion'} has now completed ${completedLessons} lessons — each one a permanent part of their behavioural foundation.`,
+        icon: '🏆',
+      })
+      localStorage.setItem(key, '1')
+    }, 1500)
+  }, [completedLessons, core?.dogName])
+
+  // Onboarding redirect
   useEffect(() => {
     if (!ready && state.isAuthenticated && state.userRole === 'client') {
       navigate('/academy/onboarding')
     }
   }, [ready, state.isAuthenticated])
 
-  // Milestone detection
-  useEffect(() => {
-    if (!core) return
-    const completedCount = core.completedLessons
-    if (completedCount > 0 && completedCount % 5 === 0) {
-      const stored = localStorage.getItem(`fp_milestone_shown_${completedCount}`)
-      if (!stored) {
-        setTimeout(() => {
-          setMilestone({
-            title: 'Lesson Milestone Reached',
-            subtitle: core.narrativeTemplates?.milestone || `${core.dogName} has now completed ${completedCount} lessons — each one a permanent addition to their behavioural foundation.`,
-            icon: '🏆',
-          })
-          localStorage.setItem(`fp_milestone_shown_${completedCount}`, '1')
-        }, 1200)
-      }
-    }
-  }, [core?.completedLessons])
-
-  const handleCourseNav = (courseId, lessonId) => {
-    SOUNDS.tap()
-    if (lessonId) navigate(`/academy/course/${courseId}/lesson/${lessonId}`)
-    else navigate(`/academy/course/${courseId}`)
-  }
-
   if (!ready && !core) {
-    return <IntelligenceLoader label="Calibrating intelligence profile…" />
+    return <IntelligenceLoader label="Preparing your session…" />
   }
 
   return (
-    <div className="min-h-screen p-5 lg:p-8 max-w-6xl mx-auto relative">
-      <AmbientOrbs count={3} colour="rgba(201,168,76,0.03)" className="fixed" />
+    <div className="min-h-screen p-5 lg:p-8 max-w-3xl mx-auto relative">
+      {/* Single ambient orb — restrained */}
+      <AmbientOrbs count={1} colour="rgba(201,168,76,0.025)" />
 
-      {/* ── CONCIERGE GREETING ─────────────────────────────── */}
-      <div className="mb-6">
-        {core ? (
-          <ConciergeGreeting core={{ ...core, narrative }} tierMeta={tierMeta} can={can} />
-        ) : (
-          <FadeIn>
-            <div className="glass-card p-8" style={{ border: '1px solid rgba(201,168,76,0.1)' }}>
-              <div className="font-display text-2xl text-pearl">Welcome to your Academy.</div>
-            </div>
+      {/* ── COMPANION ORB + INTELLIGENCE SURFACE ─────────── */}
+      {/* Mobile: companion above, intelligence below */}
+      {/* Desktop: side-by-side */}
+      <div className="flex flex-col lg:flex-row items-start gap-6 mb-6">
+
+        {/* Companion orb — emotional presence */}
+        {core?.emotionalState && (
+          <FadeIn className="flex-shrink-0 lg:pt-6">
+            <CompanionOrb emotionalState={emotionalState} dogName={core.dogName} />
           </FadeIn>
         )}
+
+        {/* Intelligence surface — the single output */}
+        <div className="flex-1 min-w-0">
+          <IntelligenceSurface
+            surface={surface}
+            greeting={core?.narrative?.greeting || core?.greeting}
+            voiceEnabled={VOICE_COACH_AVAILABLE && can.voiceCoach}
+            onVoice={handleVoice}
+            voiceActive={voiceActive}
+          />
+        </div>
       </div>
 
-      {/* ── ALERT PANEL ──────────────────────────────────────── */}
-      {topAlert && (
-        <div className="mb-5">
-          <AlertPanel alert={topAlert} />
+      {/* ── QUIET STATS — two numbers, nothing more ────────── */}
+      <QuietStats streak={streak} completedLessons={completedLessons} />
+
+      {/* ── NEXT LESSON — the single programme CTA ─────────── */}
+      {myCourses.length > 0 && (
+        <div className="mt-5">
+          <NextLessonCard
+            courses={myCourses}
+            progress={courseProgress}
+            onNavigate={(courseId, lessonId) => {
+              SOUNDS.tap()
+              navigate(lessonId
+                ? `/academy/course/${courseId}/lesson/${lessonId}`
+                : `/academy/course/${courseId}`)
+            }}
+          />
         </div>
       )}
 
-      {/* ── DAILY INSIGHT ────────────────────────────────────── */}
-      {narrative.insight && (
-        <div className="mb-6">
-          <DailyInsightCard insight={narrative.insight} />
-        </div>
+      {/* ── AVAILABLE PROGRAMMES — quiet, non-urgent ─────────── */}
+      {availableCourses.length > 0 && myCourses.length === 0 && (
+        <FadeIn delay={0.2} className="mt-5">
+          <div className="font-sans text-[8px] uppercase tracking-[0.35em] text-silver-700 mb-3">Available Programmes</div>
+          <div className="space-y-2">
+            {availableCourses.map((c, i) => (
+              <AvailableCourseCard key={c.id} course={c} index={i} />
+            ))}
+          </div>
+        </FadeIn>
       )}
 
-      {/* ── MAIN GRID ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* LEFT — courses */}
-        <div className="lg:col-span-2 space-y-5">
-
-          {/* Enrolled courses */}
-          {myCoursesData.length > 0 && (
-            <FadeIn>
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-sans text-[9px] uppercase tracking-[0.3em] text-silver-700">Active Programmes</div>
-                  <Link to="/academy" className="font-sans text-[9px] text-gold-600 hover:text-gold-400 transition-colors flex items-center gap-1">
-                    View All <ChevronRight size={9} />
-                  </Link>
-                </div>
-                <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {myCoursesData.slice(0, 4).map((course, i) => (
-                    <CourseCard key={course.id} course={course}
-                      progress={courseProgress[course.id]}
-                      isEnrolled={true}
-                      onNavigate={handleCourseNav}
-                      index={i}
-                    />
-                  ))}
-                </StaggerContainer>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* Available courses */}
-          {availableCourses.length > 0 && (
-            <FadeIn delay={0.15}>
-              <div>
-                <div className="font-sans text-[9px] uppercase tracking-[0.3em] text-silver-700 mb-3">Recommended Programmes</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {availableCourses.map((course, i) => (
-                    <CourseCard key={course.id} course={course}
-                      progress={null} isEnrolled={false}
-                      onNavigate={() => navigate(`/academy/course/${course.id}`)}
-                      index={i + 10}
-                    />
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* Empty state */}
-          {myCoursesData.length === 0 && availableCourses.length === 0 && (
-            <FadeIn>
-              <div className="glass-card p-10 text-center" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="text-4xl mb-4">📚</div>
-                <div className="font-serif text-lg text-pearl mb-2">Your Programme Awaits</div>
-                <p className="font-sans text-sm text-silver-600 font-light max-w-xs mx-auto">
-                  Your behavioural intelligence profile is ready. Your programmes will appear here.
-                </p>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* Behaviour narrative secondary */}
-          {narrative.secondary && (
-            <FadeIn delay={0.3}>
-              <div className="p-5"
-                style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)' }}>
-                <div className="flex items-start gap-3">
-                  <Activity size={13} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-600 mb-1.5">Behavioural Intelligence</div>
-                    <p className="font-sans text-xs text-silver-400 font-light leading-relaxed italic">{narrative.secondary}</p>
-                  </div>
-                </div>
-              </div>
-            </FadeIn>
-          )}
-        </div>
-
-        {/* RIGHT SIDEBAR */}
-        <div className="space-y-5">
-
-          {/* Quick nav */}
-          <QuickNavGrid navItems={navItems} can={can} />
-
-          {/* Intelligence scores */}
-          {core?.intScores && (
-            <FadeIn delay={0.2}>
-              <div className="glass-card p-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="font-sans text-[9px] uppercase tracking-[0.3em] text-silver-700 mb-4">Intelligence Profile</div>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Confidence',   value: core.intScores.confidence,  colour: '#10B981' },
-                    { label: 'Stability',    value: core.intScores.stability,   colour: '#C9A84C' },
-                    { label: 'Social',       value: core.intScores.social,      colour: '#8B5CF6' },
-                    { label: 'Engagement',   value: core.intScores.engagement,  colour: '#3B82F6' },
-                    { label: 'Consistency',  value: core.intScores.consistency, colour: '#F59E0B' },
-                  ].map(metric => (
-                    <div key={metric.label}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-sans text-[9px] text-silver-600">{metric.label}</span>
-                        <span className="font-mono text-[10px]" style={{ color: metric.colour }}>{metric.value}%</span>
-                      </div>
-                      <div className="h-0.5 bg-white/5 overflow-hidden">
-                        <motion.div className="h-full rounded-full"
-                          style={{ background: metric.colour }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${metric.value}%` }}
-                          transition={{ duration: 1, ease: 'easeOut' }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* Streak + Progress stats */}
-          <FadeIn delay={0.25}>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Streak',      value: `${streak.current || 0}d`, icon: '🔥', colour: '#F59E0B' },
-                { label: 'Lessons',     value: core?.completedLessons || 0, icon: '✓', colour: '#10B981' },
-                { label: 'Programmes',  value: myCoursesData.length,  icon: '📚', colour: '#C9A84C' },
-                { label: 'Achievements',value: (achievements || []).filter(a => a.earned).length, icon: '🏆', colour: '#8B5CF6' },
-              ].map(s => (
-                <div key={s.label} className="glass-card p-4 text-center"
-                  style={{ border: '1px solid rgba(255,255,255,0.04)' }}>
-                  <div className="text-lg mb-1">{s.icon}</div>
-                  <div className="font-display text-xl font-light" style={{ color: s.colour }}>{s.value}</div>
-                  <div className="font-sans text-[8px] text-silver-700 uppercase tracking-widest mt-0.5">{s.label}</div>
-                </div>
-              ))}
+      {/* ── MEMBERSHIP TIER — the quietest element ──────────── */}
+      {tierMeta && (
+        <FadeIn delay={0.35} className="mt-6">
+          <div className="flex items-center justify-between py-4 border-t border-white/[0.04]">
+            <div className="flex items-center gap-2">
+              <span className="text-base">{tierMeta.icon}</span>
+              <span className="font-sans text-[9px] text-silver-700" style={{ color: `${tierMeta.colour}90` }}>
+                {tierMeta.name}
+              </span>
             </div>
-          </FadeIn>
+            <button
+              onClick={() => { SOUNDS.tap(); navigate('/academy/method') }}
+              className="flex items-center gap-1.5 font-sans text-[9px] text-silver-700 hover:text-silver-400 transition-colors uppercase tracking-widest">
+              The Method™ <ArrowRight size={9} />
+            </button>
+          </div>
+        </FadeIn>
+      )}
 
-          {/* Tier + Package */}
-          {tierMeta && (
-            <FadeIn delay={0.3}>
-              <div className="p-5 relative overflow-hidden"
-                style={{ background: `${tierMeta.colour}08`, border: `1px solid ${tierMeta.colour}20` }}>
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ background: `radial-gradient(ellipse 80% 80% at 100% 0%, ${tierMeta.colour}06 0%, transparent 70%)` }} />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl">{tierMeta.icon}</span>
-                    <span className="font-sans text-[9px] uppercase tracking-widest" style={{ color: tierMeta.colour }}>
-                      {tierMeta.name}
-                    </span>
-                  </div>
-                  {packageMeta && (
-                    <div className="font-sans text-xs text-silver-500 mt-1">{packageMeta.name}</div>
-                  )}
-                  {packageMeta?.tagline && (
-                    <div className="font-serif text-[10px] italic text-silver-600 mt-0.5">{packageMeta.tagline}</div>
-                  )}
-                </div>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* Recent achievements */}
-          {achievements && achievements.filter(a => a.earned).length > 0 && (
-            <FadeIn delay={0.35}>
-              <div>
-                <div className="font-sans text-[9px] uppercase tracking-[0.3em] text-silver-700 mb-3">Recent Milestones</div>
-                <div className="space-y-2">
-                  {achievements.filter(a => a.earned).slice(0, 3).map(a => (
-                    <div key={a.id} className="flex items-center gap-3 p-3 border border-white/5">
-                      <span className="text-xl flex-shrink-0">{a.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-sans text-xs text-pearl truncate">{a.title}</div>
-                        <div className="font-sans text-[9px] text-silver-600 truncate">{a.description}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          )}
-        </div>
-      </div>
-
-      {/* Milestone overlay */}
+      {/* ── MILESTONE OVERLAY ──────────────────────────────── */}
       <AnimatePresence>
         {milestone && (
           <MilestoneReveal

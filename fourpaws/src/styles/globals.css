@@ -304,3 +304,93 @@
   .snap-start { scroll-snap-align: start }
   .snap-x     { scroll-snap-type: x mandatory }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   ODIN DOCTRINE — Noiseless Luxury Design System
+   Applied globally. Reduces visual noise. Increases calm.
+   ───────────────────────────────────────────────────────────── */
+
+@layer base {
+  /* Longer, softer scroll behaviour */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Reduce excessive motion globally — respect user preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* NOISELESS SURFACE — the three-surface doctrine container */
+  .noiseless-surface {
+    @apply relative overflow-hidden;
+    background: linear-gradient(160deg, rgba(201,168,76,0.05) 0%, rgba(201,168,76,0.015) 100%);
+    border: 1px solid rgba(201,168,76,0.12);
+  }
+
+  .noiseless-surface::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+  }
+
+  /* CALM DIVIDER — replaces hard rules */
+  .calm-divider {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.12), transparent);
+    border: none;
+  }
+
+  /* QUIET LABEL — section labels that don't demand attention */
+  .quiet-label {
+    @apply font-sans uppercase tracking-[0.4em] text-silver-700;
+    font-size: 8px;
+  }
+
+  /* OBSERVATIONAL TEXT — the voice of the system */
+  .observational {
+    @apply font-sans text-sm text-silver-400 font-light leading-relaxed;
+  }
+
+  /* OBSERVATIONAL SMALL — secondary narrative */
+  .observational-sm {
+    @apply font-sans text-xs text-silver-500 font-light leading-relaxed italic;
+  }
+
+  /* Reduced animation on glass cards — quieter hover */
+  .glass-card {
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .glass-card:hover {
+    border-color: rgba(201,168,76,0.2) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+
+  /* Suppress badge/chip noise — remove bold from status labels */
+  .status-label {
+    @apply font-sans text-[8px] font-normal uppercase tracking-widest;
+  }
+}
+
+@layer utilities {
+  /* Generous breathing room */
+  .space-luxury { @apply space-y-6 }
+  .p-luxury     { @apply p-6 lg:p-8 }
+
+  /* Single-surface spacing */
+  .section-gap  { @apply mb-5 }
+
+  /* Text that doesn't compete */
+  .text-whisper { color: rgba(255,255,255,0.25) }
+  .text-quiet   { color: rgba(255,255,255,0.45) }
+  .text-present { color: rgba(255,255,255,0.70) }
+}

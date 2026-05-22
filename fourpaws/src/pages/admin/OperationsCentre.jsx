@@ -15,6 +15,7 @@ import { useApp } from '../../context/AppContext'
 import { getAnalyticsData } from '../../data/clients'
 import { COURSES } from '../../data/courses'
 import { detectClientRisks, getSyncStatus, FOUR_PAWS_METHOD, detectTransformationStage } from '../../ai/fourPawsMethod'
+import { buildAdminInsight, purifyText, MOTION } from '../../ai/narrativeVoice'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 import { AmbientOrbs, CardEntrance } from '../../components/ui/PageTransition'
 import { SOUNDS } from '../../ai/intelligenceCore'
@@ -42,7 +43,7 @@ function PriorityAlert({ alert, index, onAction }) {
               {alert.priority}
             </span>
           </div>
-          <p className="font-sans text-[10px] text-silver-500 font-light leading-relaxed">{alert.message}</p>
+          <p className="font-sans text-[10px] text-silver-500 font-light leading-relaxed">{purifyText(buildAdminInsight(alert.name, alert.dogName, alert.type, 0)) || purifyText(alert.message)}</p>
         </div>
         <button onClick={() => onAction(alert)}
           className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 text-[9px] font-sans uppercase tracking-widest transition-colors"
@@ -72,7 +73,7 @@ function ClientHealthRow({ client, index, onClick }) {
     <CardEntrance index={index}>
       <motion.div
         className="flex items-center gap-4 py-3 px-4 border-b border-white/[0.04] last:border-0 cursor-pointer"
-        whileHover={{ background: 'rgba(255,255,255,0.02)' }}
+        whileHover={{ background: 'rgba(255,255,255,0.02)' }} transition={{ duration: 0.2 }}
         onClick={onClick}
       >
         {/* Avatar */}
@@ -218,7 +219,7 @@ export default function OperationsCentre() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <div className="divider-gold w-6" />
-              <span className="section-label text-[9px]">Four Paws Intelligence Operations</span>
+              <span className="section-label text-[9px]">Operations</span>
             </div>
             <h1 className="luxury-heading text-4xl lg:text-5xl mb-1">Operations Centre</h1>
             <p className="font-sans text-xs text-silver-600 font-light">

@@ -26,6 +26,7 @@ import { loadAIMemory, saveAIMemory, patchAIMemory, recordBehaviourSnapshot, gen
 import { loadWellnessData, getWellnessSummary } from './wellness'
 import { computeEarnedAchievements } from './achievements'
 import { getArchetype, getClientTier, computeIntelligenceScores } from './archetypes'
+import { purifyText } from './narrativeVoice'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STORAGE KEY
@@ -51,8 +52,8 @@ const NARRATIVE_TEMPLATES = {
 
   // Emotional state observations
   emotional: {
-    serene:    (d) => `${d} is presenting exceptional emotional stability. This is the state in which the deepest learning occurs.`,
-    settled:   (d) => `${d} is emotionally regulated and receptive. Ideal conditions for today's session.`,
+    serene:    (d) => `${d} is presenting patterns consistent with genuine emotional stability — the state in which the deepest learning occurs.`,
+    settled:   (d) => `${d} appears emotionally regulated and receptive. Conditions are well-suited for today's session.`,
     alert:     (d) => `${d} is in an engaged, alert state. Manage the environment carefully and capitalise on this focus window.`,
     aroused:   (d) => `${d}'s arousal is elevated. Begin with decompression before advancing to any new material.`,
     anxious:   (d) => `${d} requires emotional first aid today. Prioritise decompression and calm reinforcement over formal training.`,
@@ -214,8 +215,8 @@ export function generateCoreIntelligence(dogProfile, clientProfile, enrolledCour
   const dogName   = dogProfile?.name || 'your companion'
   const firstName = (clientProfile?.name || '').split(' ')[0] || 'there'
 
-  const greeting    = getDynamicGreeting(clientProfile?.name, dogName, memory.sessionCount || 0)
-  const coaching    = getConciergeCoachingSummary(clientProfile?.name, dogName, behaviourScores, dogProfile?.age, completedLessons)
+  const greeting    = purifyText(getDynamicGreeting(clientProfile?.name, dogName, memory.sessionCount || 0))
+  const coaching    = purifyText(getConciergeCoachingSummary(clientProfile?.name, dogName, behaviourScores, dogProfile?.age, completedLessons))
   const narratives  = generateBehaviouralNarrative(dogName, behaviourScores, emotionalState, memory.sessionCount || 0)
   const dailyInsight = NARRATIVE_TEMPLATES.insight[(memory.sessionCount || 0) % NARRATIVE_TEMPLATES.insight.length](dogName)
 
