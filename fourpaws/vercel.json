@@ -1,7 +1,6 @@
 {
-  "buildCommand": "npm run build:strict",
+  "buildCommand": "NODE_ENV=production FP_ENFORCE_FIREWALL=1 node build/firewall/mockDataGuard.js --production && FP_ENFORCE_FIREWALL=1 node node_modules/vite/dist/node/cli.js build",
   "outputDirectory": "dist",
-  "framework": "vite",
   "installCommand": "npm install",
   "routes": [
     {
