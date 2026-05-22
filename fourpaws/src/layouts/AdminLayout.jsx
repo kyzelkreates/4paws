@@ -128,13 +128,20 @@ export default function AdminLayout() {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed inset-y-0 left-0 z-30 w-64 flex flex-col border-r border-white/5 lg:hidden"
               style={{ background: 'rgba(8,8,8,0.99)' }}>
-              <div className="p-5 pt-16 space-y-1">
-                {navItems.map(item => (
-                  <Link key={item.label} to={item.to} onClick={() => setSidebarOpen(false)}
-                    className={`sidebar-item ${isActive(item.to) ? 'active' : ''}`}>
-                    <item.icon size={16} />
-                    <span>{item.label}</span>
-                  </Link>
+              <div className="p-5 pt-16 overflow-y-auto">
+                {NAV_GROUPS.map(group => (
+                  <div key={group.label} className="mb-2">
+                    <div className="px-2 py-1.5 font-sans text-[7px] uppercase tracking-[0.4em] text-silver-800">
+                      {group.label}
+                    </div>
+                    {group.items.map(item => (
+                      <Link key={item.label} to={item.to} onClick={() => setSidebarOpen(false)}
+                        className={`sidebar-item ${isActive(item.to) ? 'active' : ''}`}>
+                        <item.icon size={15} />
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </div>
               <div className="mt-auto p-5 border-t border-white/5">

@@ -14,6 +14,7 @@ import {
 import { logMoodEntry, loadDigitalTwin } from '../../ai/digitalTwin'
 import { loadStreak, loadAIMemory } from '../../ai/aiMemory'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 // ── Mood Logger ───────────────────────────────────────────────
 const MOOD_LABELS = {

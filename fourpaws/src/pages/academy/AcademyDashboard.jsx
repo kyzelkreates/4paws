@@ -400,6 +400,30 @@ export default function AcademyDashboard() {
         </FadeIn>
       )}
 
+      {/* ── QUICK ACCESS — calm surface links ─────────────── */}
+      <FadeIn delay={0.4} className="mt-5">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'Daily Reflection', to: '/academy/reflection', icon: '💭', colour: '#C9A84C' },
+            { label: 'Daily Rituals',    to: '/academy/rituals',    icon: '🌅', colour: '#F59E0B' },
+            { label: 'Companion AI',     to: '/academy/companion',  icon: '🐾', colour: '#8B5CF6' },
+          ].map(item => (
+            <motion.button
+              key={item.to}
+              onClick={() => { SOUNDS.tap(); navigate(item.to) }}
+              className="py-3 px-2 text-center transition-all"
+              style={{ border: `1px solid ${item.colour}15`, background: `${item.colour}04` }}
+              whileHover={{ y: -2, borderColor: item.colour + '30' }}
+            >
+              <div className="text-lg mb-1">{item.icon}</div>
+              <div className="font-sans text-[8px] uppercase tracking-wider" style={{ color: `${item.colour}90` }}>
+                {item.label}
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </FadeIn>
+
       {/* ── MILESTONE OVERLAY ──────────────────────────────── */}
       <AnimatePresence>
         {milestone && (

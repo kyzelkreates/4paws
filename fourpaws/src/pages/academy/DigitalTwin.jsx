@@ -7,6 +7,7 @@ import { buildDigitalTwin, generateTransformationForecast, loadDigitalTwin } fro
 import { getCurrentPhase, getNextPhase } from '../../ai/wellness'
 import { loadStreak } from '../../ai/aiMemory'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 const LEVEL_COLOUR = { high: '#EF4444', moderate: '#F59E0B', low: '#10B981', minimal: '#6B7280' }
 const LEVEL_PCT    = { high: 80, moderate: 50, low: 25, minimal: 10 }

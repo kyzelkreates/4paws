@@ -7,6 +7,7 @@ import { loadAIMemory, loadStreak } from '../../ai/aiMemory'
 import { computeIntelligenceScores, getArchetype } from '../../ai/archetypes'
 import { computeEarnedAchievements, ACHIEVEMENT_TIERS } from '../../ai/achievements'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 const TRAIT_META = {
   anxiety:       { label: 'Anxiety',        icon: '😰', note: 'Lower is better', invert: true },

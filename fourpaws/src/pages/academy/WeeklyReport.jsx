@@ -8,6 +8,7 @@ import { getCurrentPhase } from '../../ai/wellness'
 import { loadStreak, loadAIMemory } from '../../ai/aiMemory'
 import { loadDigitalTwin } from '../../ai/digitalTwin'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 function StatRow({ label, value, icon, colour = '#C9A84C' }) {
   return (

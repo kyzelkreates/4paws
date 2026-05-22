@@ -11,6 +11,7 @@ import { getCurrentPhase } from '../../ai/wellness'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 import { generateCertificateData } from '../../ai/achievements'
 import { COURSES } from '../../data/courses'
+import { purifyText } from '../../ai/narrativeVoice'
 
 const TIER_METAL_STYLES = {
   BRONZE:   { bg: 'radial-gradient(circle, #CD7F32 0%, #8B4513 100%)', shadow: '0 0 16px rgba(205,127,50,0.4)' },

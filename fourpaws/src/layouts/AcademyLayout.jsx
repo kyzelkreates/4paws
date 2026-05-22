@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
-  LogOut, Menu, X, Shield, MapPin, BarChart2, Clock,
+  LogOut, Menu, X, Shield, MapPin, BarChart2, Clock, Cloud,
   Award, Flame, Sparkles, Volume2, Brain, Zap, Wind,
   Map, BookMarked, Activity, Archive, FileText, Star, Calendar, TrendingUp, Sun,
 } from 'lucide-react'
@@ -252,6 +252,10 @@ export default function AcademyLayout() {
             <span>Voice Concierge</span>
           </button>
         )}
+        <Link to="/academy/sync" className="sidebar-item text-xs text-silver-700 hover:text-silver-400">
+          <Cloud size={13} />
+          <span>Sync & Storage</span>
+        </Link>
         <button onClick={handleLogout} className="sidebar-item w-full text-xs">
           <LogOut size={14} className="text-silver-600" />
           <span className="text-silver-600">Sign Out</span>

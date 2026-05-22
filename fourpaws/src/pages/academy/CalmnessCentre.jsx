@@ -11,6 +11,7 @@ import { useApp } from '../../context/AppContext'
 import { SOUNDSCAPES, playSoundscape, stopSoundscape } from '../../ai/wellness'
 import { speak, VOICE_COACH_AVAILABLE } from '../../ai/voiceCoach'
 import { FadeIn } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 // ── Breathing guide ───────────────────────────────────────────
 const BREATHING_PHASES = [

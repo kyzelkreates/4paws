@@ -6,6 +6,7 @@ import { computeIntelligenceScores, getArchetype } from '../../ai/archetypes'
 import { generatePredictiveAlerts } from '../../ai/concierge'
 import { loadStreak, loadAIMemory } from '../../ai/aiMemory'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 const HEATMAP_TRAITS = [
   { key: 'anxiety',       label: 'Stress',        icon: '😰', invert: true,  colour: '#EF4444' },

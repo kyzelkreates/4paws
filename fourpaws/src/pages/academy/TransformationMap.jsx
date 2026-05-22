@@ -13,6 +13,7 @@ import { loadStreak, loadAIMemory } from '../../ai/aiMemory'
 import { computeEarnedAchievements } from '../../ai/achievements'
 import { computeIntelligenceScores, getClientTier } from '../../ai/archetypes'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { purifyText } from '../../ai/narrativeVoice'
 
 function MapNode({ node, isActive, isCurrent, onClick }) {
   const colour = node.achieved ? '#C9A84C' : '#2A2A2A'
