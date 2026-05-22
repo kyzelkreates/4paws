@@ -1,287 +1,332 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Share2, MessageSquare, Mail, Wifi, Bluetooth, Smartphone,
-  Copy, Check, ExternalLink, Send, Users, QrCode
-} from 'lucide-react'
+import { Copy, Check, Zap, Package, Users, RefreshCw, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
+import {
+  generateAcademyLinkCode,
+  loadRegistry,
+  saveRegistry,
+  getClientIdentity,
+} from '../../utils/academyIdentity'
+import {
+  PACKAGES, TIER_LEVELS, TRANSFORMATION_PATHWAYS,
+  buildAcademyConfig, FEATURE_MATRIX,
+} from '../../config/academyConfig'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 
-const APP_URL = window.location.origin
+const TIER_COLOUR = {
+  GOLD:      '#C9A84C',
+  PLATINUM:  '#C0C0C0',
+  OBSIDIAN:  '#C9A84C',
+  FOUNDERS:  '#F5E09A',
+  CONCIERGE: '#9FDBFF',
+}
 
-export default function DistributionPage() {
-  const { state, notify } = useApp()
-  const [copied, setCopied] = useState(false)
-  const [selectedMethod, setSelectedMethod] = useState(null)
-  const [emailTo, setEmailTo] = useState('')
-  const [whatsappNum, setWhatsappNum] = useState('')
-
-  const clients = state.allClients || []
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(APP_URL)
-    setCopied(true)
-    notify('Academy link copied!', 'success')
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const sendWhatsApp = (number) => {
-    const msg = encodeURIComponent(
-      `Welcome to Four Paws Training & Enrichment Academy 🐾\n\nYour private academy access is ready. Click below to install your personalised academy app:\n\n${APP_URL}\n\nOnce installed, sign in with your email and password to begin your transformation journey.\n\n— The Four Paws Academy Team`
-    )
-    const url = `https://wa.me/${number.replace(/\D/g, '')}?text=${msg}`
-    window.open(url, '_blank')
-    notify('WhatsApp opened.', 'success')
-  }
-
-  const sendEmail = (to) => {
-    const subject = encodeURIComponent('Your Four Paws Academy Access Is Ready')
-    const body = encodeURIComponent(
-      `Dear Academy Member,\n\nWelcome to Four Paws Training & Enrichment Academy.\n\nYour exclusive access to our luxury canine transformation platform is now ready.\n\nTo get started:\n1. Visit: ${APP_URL}\n2. Sign in with your registered email and password\n3. Install the app on your device for the full experience\n\nWe look forward to accompanying you and your dog on this extraordinary journey.\n\nWith warmth,\nThe Four Paws Academy Team`
-    )
-    window.open(`mailto:${to}?subject=${subject}&body=${body}`)
-    notify('Email client opened.', 'success')
-  }
-
-  const methods = [
-    {
-      id: 'whatsapp',
-      icon: MessageSquare,
-      label: 'WhatsApp',
-      desc: 'Send academy access directly via WhatsApp',
-      color: '#25D366',
-      status: 'ready',
-    },
-    {
-      id: 'email',
-      icon: Mail,
-      label: 'Email',
-      desc: 'Deliver a premium access email to your client',
-      color: '#C9A84C',
-      status: 'ready',
-    },
-    {
-      id: 'link',
-      icon: Copy,
-      label: 'Copy Link',
-      desc: 'Copy the academy URL to share anywhere',
-      color: '#9C9C9C',
-      status: 'ready',
-    },
-    {
-      id: 'nfc',
-      icon: Wifi,
-      label: 'NFC Tap',
-      desc: 'Luxury NFC card tap-to-access distribution',
-      color: '#7EC8E3',
-      status: 'coming',
-    },
-    {
-      id: 'bluetooth',
-      icon: Bluetooth,
-      label: 'Bluetooth',
-      desc: 'Proximity-based access sharing',
-      color: '#B388FF',
-      status: 'coming',
-    },
-    {
-      id: 'wifi',
-      icon: Wifi,
-      label: 'WiFi Direct',
-      desc: 'Local network instant distribution',
-      color: '#FF8FAB',
-      status: 'coming',
-    },
-  ]
-
+function PackageCard({ pkg, isSelected, onSelect }) {
+  const tier   = TIER_LEVELS[pkg.tier] || TIER_LEVELS.GOLD
+  const colour = TIER_COLOUR[pkg.tier] || '#C9A84C'
   return (
-    <div className="min-h-screen p-6 lg:p-10 max-w-5xl mx-auto">
-      <FadeIn className="mb-10">
-        <div className="section-label mb-2">Access Control</div>
-        <h1 className="luxury-heading text-4xl lg:text-5xl mb-3">App Distribution</h1>
-        <p className="font-sans text-base font-light text-silver-500 max-w-xl">
-          Share the Four Paws Academy app with your clients through multiple premium channels.
-        </p>
-      </FadeIn>
-
-      {/* App card */}
-      <FadeIn className="glass-card gold-border p-6 mb-8 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30"
-          style={{ background: 'radial-gradient(ellipse 60% 60% at 100% 50%, rgba(201,168,76,0.08) 0%, transparent 70%)' }} />
-        <div className="relative z-10 flex items-center gap-5 flex-wrap">
-          <div className="w-16 h-16 bg-charcoal-800 border border-gold-500/20 flex items-center justify-center text-3xl flex-shrink-0">
-            🐾
+    <motion.button onClick={() => onSelect(pkg.id)}
+      whileHover={{ y: -2, borderColor: colour + '50' }}
+      className={`glass-card p-5 text-left w-full transition-all ${isSelected ? 'ring-1' : ''}`}
+      style={{ border: `1px solid ${isSelected ? colour + '60' : colour + '20'}`, boxShadow: isSelected ? `0 0 20px ${colour}15` : 'none' }}>
+      <div className="flex items-start gap-3">
+        <span className="text-3xl flex-shrink-0">{pkg.icon}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="font-serif text-base font-medium text-pearl">{pkg.name}</div>
+            {isSelected && <Check size={12} style={{ color: colour }} />}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-sans text-[9px] tracking-widest uppercase text-gold-500 mb-1">PWA Academy App</div>
-            <h2 className="font-serif text-xl text-pearl mb-1">Four Paws Training & Enrichment Academy</h2>
-            <div className="font-sans text-xs text-silver-500 font-mono truncate">{APP_URL}</div>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="text-center">
-              <div className="stat-number text-xl">{clients.filter(c => c.pwaInstalled).length}</div>
-              <div className="font-sans text-[9px] text-silver-700 uppercase tracking-widest">Installed</div>
-            </div>
-            <div className="text-center">
-              <div className="stat-number text-xl">{clients.length}</div>
-              <div className="font-sans text-[9px] text-silver-700 uppercase tracking-widest">Clients</div>
-            </div>
+          <div className="font-sans text-[10px] text-silver-500 mb-2">{pkg.tagline}</div>
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[8px] px-2 py-0.5 border uppercase tracking-wider"
+              style={{ color: colour, borderColor: colour + '30', background: colour + '10' }}>
+              {tier.name}
+            </span>
+            <span className="font-sans text-[9px] text-silver-600">
+              {Array.isArray(pkg.courses) ? pkg.courses.length : '∞'} courses
+            </span>
           </div>
         </div>
-      </FadeIn>
+      </div>
+    </motion.button>
+  )
+}
 
-      {/* Distribution methods */}
-      <FadeIn className="mb-8">
-        <div className="section-label mb-4">Distribution Channels</div>
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {methods.map(method => (
-            <StaggerItem key={method.id}>
-              <motion.div
-                whileHover={method.status === 'ready' ? { y: -3, borderColor: `${method.color}40` } : {}}
-                onClick={() => method.status === 'ready' && setSelectedMethod(method.id)}
-                className={`glass-card p-5 cursor-pointer transition-all border
-                  ${method.status === 'coming' ? 'opacity-50 cursor-default border-white/5' : 'border-white/8 hover:border-opacity-50'}
-                  ${selectedMethod === method.id ? 'border-gold-500/40 bg-gold-500/5' : ''}`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-9 h-9 flex items-center justify-center rounded-none"
-                    style={{ background: `${method.color}15`, border: `1px solid ${method.color}30` }}>
-                    <method.icon size={16} style={{ color: method.color }} />
-                  </div>
-                  {method.status === 'coming' && (
-                    <span className="font-sans text-[9px] tracking-widest uppercase text-silver-600 bg-charcoal-800 px-2 py-0.5">
-                      Soon
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-serif text-base font-medium text-pearl mb-1">{method.label}</h3>
-                <p className="font-sans text-xs text-silver-500">{method.desc}</p>
-              </motion.div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </FadeIn>
+function FeatureList({ packageId }) {
+  const pkg      = PACKAGES[packageId]
+  if (!pkg) return null
+  const isAll    = pkg.enabledFeatures === '__ALL__'
+  const features = isAll ? Object.keys(FEATURE_MATRIX) : (pkg.enabledFeatures || [])
+  const [open, setOpen] = useState(false)
 
-      {/* Action panel */}
+  return (
+    <div className="mt-4">
+      <button onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 font-sans text-[9px] text-silver-600 hover:text-silver-400 uppercase tracking-widest">
+        {open ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+        {features.length} features included
+      </button>
       <AnimatePresence>
-        {selectedMethod && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="glass-card gold-border p-8 mb-8"
-          >
-            {selectedMethod === 'whatsapp' && (
-              <div>
-                <div className="section-label mb-2">WhatsApp Distribution</div>
-                <h3 className="luxury-heading text-2xl mb-5">Send Academy Access</h3>
-                <div className="mb-5">
-                  <label className="section-label text-[10px] block mb-2">WhatsApp Number</label>
-                  <input
-                    value={whatsappNum}
-                    onChange={e => setWhatsappNum(e.target.value)}
-                    placeholder="+44 7700 900000"
-                    className="premium-input max-w-sm"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-3 mb-5">
-                  {clients.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setWhatsappNum(c.phone)}
-                      className="font-sans text-xs px-3 py-1.5 border border-white/10 hover:border-gold-500/30 text-silver-400 hover:text-silver-200 transition-all"
-                    >
-                      {c.name.split(' ')[0]}
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => whatsappNum && sendWhatsApp(whatsappNum)} className="btn-gold text-xs flex items-center gap-2">
-                  <Send size={13} /> Open WhatsApp
-                </button>
-              </div>
-            )}
-
-            {selectedMethod === 'email' && (
-              <div>
-                <div className="section-label mb-2">Email Distribution</div>
-                <h3 className="luxury-heading text-2xl mb-5">Send Access Email</h3>
-                <div className="mb-5">
-                  <label className="section-label text-[10px] block mb-2">Client Email</label>
-                  <input
-                    value={emailTo}
-                    onChange={e => setEmailTo(e.target.value)}
-                    placeholder="client@email.com"
-                    className="premium-input max-w-sm"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-3 mb-5">
-                  {clients.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setEmailTo(c.email)}
-                      className="font-sans text-xs px-3 py-1.5 border border-white/10 hover:border-gold-500/30 text-silver-400 hover:text-silver-200 transition-all"
-                    >
-                      {c.name.split(' ')[0]}
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => emailTo && sendEmail(emailTo)} className="btn-gold text-xs flex items-center gap-2">
-                  <Mail size={13} /> Send Email
-                </button>
-              </div>
-            )}
-
-            {selectedMethod === 'link' && (
-              <div>
-                <div className="section-label mb-2">Direct Link</div>
-                <h3 className="luxury-heading text-2xl mb-5">Academy URL</h3>
-                <div className="flex items-center gap-3 p-4 bg-charcoal-800 border border-white/8 mb-5">
-                  <code className="font-mono text-sm text-gold-400 flex-1 truncate">{APP_URL}</code>
-                  <button onClick={copyLink} className="text-silver-500 hover:text-gold-400 transition-colors flex-shrink-0">
-                    {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
-                  </button>
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={copyLink} className="btn-gold text-xs flex items-center gap-2">
-                    {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy Link</>}
-                  </button>
-                  <a href={APP_URL} target="_blank" rel="noreferrer" className="btn-outline-gold text-xs flex items-center gap-2">
-                    <ExternalLink size={13} /> Open App
-                  </a>
-                </div>
-              </div>
-            )}
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden">
+            <div className="grid grid-cols-2 gap-1.5 mt-3">
+              {features.map(f => {
+                const meta = FEATURE_MATRIX[f]
+                return (
+                  <div key={f} className="flex items-center gap-1.5">
+                    <span className="text-xs">{meta?.icon || '•'}</span>
+                    <span className="font-sans text-[9px] text-silver-500">{meta?.label || f}</span>
+                  </div>
+                )
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  )
+}
 
-      {/* Client PWA status */}
-      <FadeIn>
-        <div className="glass-card p-6" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <div className="section-label mb-1">Adoption</div>
-              <h3 className="font-serif text-lg text-pearl">Client PWA Status</h3>
-            </div>
-            <Smartphone size={16} className="text-gold-500" />
-          </div>
-          <div className="space-y-3">
-            {clients.map(c => (
-              <div key={c.id} className="flex items-center gap-4">
-                <div className="w-7 h-7 rounded-full bg-charcoal-800 flex items-center justify-center text-xs font-sans font-bold text-silver-400 flex-shrink-0">
-                  {c.name.charAt(0)}
-                </div>
-                <div className="flex-1 font-sans text-sm text-silver-300">{c.name}</div>
-                <div className="font-sans text-xs text-silver-600">{c.dog?.name}</div>
-                <div className={`flex items-center gap-1.5 font-sans text-xs ${c.pwaInstalled ? 'text-emerald-400' : 'text-silver-600'}`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${c.pwaInstalled ? 'bg-emerald-400' : 'bg-silver-700'}`} />
-                  {c.pwaInstalled ? 'Installed' : 'Not installed'}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+export default function DistributionPage() {
+  const { state }   = useApp()
+  const registry    = loadRegistry()
+  const clients     = state.allClients || []
+
+  const [selectedClient,  setSelectedClient]  = useState(null)
+  const [selectedPackage, setSelectedPackage] = useState('ELITE_COMPANION')
+  const [selectedTheme,   setSelectedTheme]   = useState('obsidian_gold')
+  const [generated,       setGenerated]       = useState(null)
+  const [copied,          setCopied]          = useState(false)
+  const [generating,      setGenerating]      = useState(false)
+
+  const registryEntries = useMemo(() => Object.entries(registry), [registry])
+
+  const handleGenerate = async () => {
+    setGenerating(true)
+    await new Promise(r => setTimeout(r, 800))
+
+    // Build the academy config for this package
+    const cfg    = buildAcademyConfig({ packageId: selectedPackage, theme: selectedTheme })
+    const code   = generateAcademyLinkCode()
+    const reg    = loadRegistry()
+
+    const entry = {
+      clientId:   selectedClient?.id || `client-${Date.now().toString(36)}`,
+      clientName: selectedClient?.name || 'New Client',
+      email:      selectedClient?.email || '',
+      packageId:  selectedPackage,
+      tierLevel:  cfg.tierLevel,
+      createdAt:  new Date().toISOString(),
+      config:     cfg,
+    }
+
+    reg[code] = entry
+    saveRegistry(reg)
+
+    setGenerated({ code, entry, cfg })
+    setGenerating(false)
+  }
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="min-h-screen p-6 lg:p-10 max-w-6xl mx-auto">
+
+      <FadeIn className="mb-8">
+        <div className="section-label mb-1">Package Distribution</div>
+        <h1 className="luxury-heading text-4xl">Dynamic<br /><span className="text-gold-gradient italic">Academy Generator</span></h1>
+        <p className="font-sans text-sm text-silver-500 mt-3 max-w-xl">
+          Assign a package to a client. The system generates a personalised academy configuration and unique activation code.
+        </p>
       </FadeIn>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {/* Left: Configuration panel */}
+        <div className="lg:col-span-2 space-y-8">
+
+          {/* Step 1: Client */}
+          <FadeIn>
+            <div className="section-label mb-1">Step 1</div>
+            <h2 className="luxury-heading text-xl mb-4">Select Client</h2>
+            <div className="glass-card p-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+              {clients.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                  {clients.map(c => (
+                    <motion.button key={c.id} onClick={() => setSelectedClient(c)}
+                      whileHover={{ x: 2 }}
+                      className={`flex items-center gap-3 p-3 border text-left transition-all ${selectedClient?.id === c.id ? 'border-gold-500/30 bg-gold-500/5' : 'border-white/5 hover:border-white/12'}`}>
+                      <div className="w-7 h-7 rounded-full bg-gold-gradient flex items-center justify-center text-charcoal-900 font-semibold text-xs flex-shrink-0">
+                        {(c.name || 'A').charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-sans text-xs text-pearl truncate">{c.name || 'Client'}</div>
+                        <div className="font-sans text-[9px] text-silver-600 truncate">{c.email || '—'}</div>
+                      </div>
+                      {selectedClient?.id === c.id && <Check size={11} className="text-gold-400 flex-shrink-0" />}
+                    </motion.button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Users size={24} className="text-silver-700 mx-auto mb-2" />
+                  <div className="font-sans text-sm text-silver-600">No clients yet — add clients in the Clients section.</div>
+                  <div className="font-sans text-xs text-silver-700 mt-1">You can still generate a code without selecting a client.</div>
+                </div>
+              )}
+            </div>
+          </FadeIn>
+
+          {/* Step 2: Package */}
+          <FadeIn delay={0.1}>
+            <div className="section-label mb-1">Step 2</div>
+            <h2 className="luxury-heading text-xl mb-4">Choose Package</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Object.values(PACKAGES).map(pkg => (
+                <PackageCard key={pkg.id} pkg={pkg}
+                  isSelected={selectedPackage === pkg.id}
+                  onSelect={setSelectedPackage} />
+              ))}
+            </div>
+            <FeatureList packageId={selectedPackage} />
+          </FadeIn>
+
+          {/* Step 3: Theme */}
+          <FadeIn delay={0.2}>
+            <div className="section-label mb-1">Step 3</div>
+            <h2 className="luxury-heading text-xl mb-4">Select Theme</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              {[
+                { id: 'obsidian_gold',    name: 'Obsidian Gold',    icon: '🌑', primary: '#C9A84C' },
+                { id: 'platinum_silver',  name: 'Platinum Silver',  icon: '💎', primary: '#C0C0C0' },
+                { id: 'midnight_sapphire',name: 'Midnight Sapphire',icon: '💙', primary: '#3B82F6' },
+                { id: 'royal_emerald',    name: 'Royal Emerald',    icon: '💚', primary: '#10B981' },
+                { id: 'ivory_luxe',       name: 'Ivory Luxe',       icon: '🤍', primary: '#D4A96A' },
+              ].map(t => (
+                <motion.button key={t.id} onClick={() => setSelectedTheme(t.id)}
+                  whileHover={{ y: -2 }}
+                  className={`flex items-center gap-2 p-3 border transition-all ${selectedTheme === t.id ? 'border-gold-500/40 bg-gold-500/5' : 'border-white/6 hover:border-white/14'}`}>
+                  <span className="text-xl">{t.icon}</span>
+                  <span className="font-sans text-xs text-silver-300">{t.name}</span>
+                  <div className="ml-auto w-4 h-4 rounded-full border border-white/10" style={{ background: t.primary }} />
+                </motion.button>
+              ))}
+            </div>
+          </FadeIn>
+
+          {/* Generate */}
+          <FadeIn delay={0.3}>
+            <motion.button onClick={handleGenerate} disabled={generating}
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              className="w-full btn-gold py-4 font-sans text-sm tracking-widest uppercase flex items-center justify-center gap-3 disabled:opacity-50">
+              {generating
+                ? <><RefreshCw size={14} className="animate-spin" /> Generating Academy…</>
+                : <><Zap size={14} /> Generate Academy Configuration</>
+              }
+            </motion.button>
+          </FadeIn>
+        </div>
+
+        {/* Right: Generated output */}
+        <div className="space-y-6">
+
+          <AnimatePresence>
+            {generated && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <div className="section-label mb-1">Generated</div>
+                <h2 className="luxury-heading text-xl mb-4">Academy Configuration</h2>
+
+                {/* Activation code card */}
+                <div className="relative overflow-hidden p-6 mb-4"
+                  style={{ background: 'linear-gradient(135deg, #1A1208 0%, #2A1E0A 100%)', border: '1px solid rgba(201,168,76,0.4)' }}>
+                  <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.8), transparent)' }} />
+                  <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.8), transparent)' }} />
+
+                  <div className="text-center mb-4">
+                    <div className="font-sans text-[9px] uppercase tracking-[0.4em] text-gold-600 mb-2">Activation Code</div>
+                    <div className="font-mono text-2xl font-light text-gold-400 tracking-[0.15em]">{generated.code}</div>
+                  </div>
+
+                  <motion.button onClick={() => handleCopy(generated.code)}
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    className={`w-full py-2.5 font-sans text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition-all ${
+                      copied ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/8' : 'btn-gold'
+                    }`}>
+                    {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy Code</>}
+                  </motion.button>
+                </div>
+
+                {/* Config summary */}
+                <div className="glass-card p-5 space-y-3" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div className="font-sans text-[9px] uppercase tracking-widest text-silver-700 mb-3">Configuration Summary</div>
+                  {[
+                    ['Package',    `${generated.cfg.packageMeta?.icon || ''} ${generated.cfg.packageName}`],
+                    ['Tier',       `${generated.cfg.tierMeta?.icon || ''} ${generated.cfg.tierLevel}`],
+                    ['Pathway',    generated.cfg.pathwayMeta?.name || '—'],
+                    ['Theme',      generated.cfg.theme],
+                    ['Features',   `${generated.cfg.enabledFeatures?.length || '∞'} enabled`],
+                    ['AI Systems', `${generated.cfg.enabledAI?.length || '∞'} active`],
+                    ['Concierge',  generated.cfg.conciergeLevel],
+                    ['Voice',      generated.cfg.voiceCoach ? 'Enabled' : 'Disabled'],
+                    ['Digital Twin',generated.cfg.digitalTwin ? 'Enabled' : 'Disabled'],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between">
+                      <span className="font-sans text-[9px] text-silver-600">{k}</span>
+                      <span className="font-sans text-[9px] text-silver-400 font-medium">{v}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Client note */}
+                {generated.entry.clientName && (
+                  <div className="mt-3 p-3 border border-white/5 bg-white/1">
+                    <div className="font-sans text-[9px] text-silver-600">
+                      Assigned to: <span className="text-silver-400 font-medium">{generated.entry.clientName}</span>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Registry */}
+          {registryEntries.length > 0 && (
+            <FadeIn>
+              <div className="section-label mb-1">Registry</div>
+              <h2 className="luxury-heading text-lg mb-3">Issued Codes</h2>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {registryEntries.slice(0, 20).map(([code, entry]) => {
+                  const tier   = TIER_LEVELS[entry.tierLevel] || TIER_LEVELS.GOLD
+                  const colour = tier.colour || '#C9A84C'
+                  return (
+                    <div key={code} className="flex items-center justify-between p-3 border border-white/5 hover:border-white/10 transition-colors group">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-xs text-silver-400">{code}</div>
+                        <div className="font-sans text-[9px] text-silver-600 truncate">
+                          {entry.clientName || 'Unassigned'} · {entry.packageId || '—'}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: colour }} />
+                        <button onClick={() => handleCopy(code)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Copy size={10} className="text-silver-600" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </FadeIn>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

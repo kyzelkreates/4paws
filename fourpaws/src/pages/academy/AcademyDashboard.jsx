@@ -23,6 +23,7 @@ import { getArchetype, getClientTier, computeIntelligenceScores } from '../../ai
 import { computeEarnedAchievements } from '../../ai/achievements'
 import { speak, isVoiceEnabled, VOICE_COACH_AVAILABLE } from '../../ai/voiceCoach'
 import { loadAIMemory } from '../../ai/aiMemory'
+import { useAcademyConfig } from '../../context/AcademyConfigContext'
 
 // ─────────────────────────────────────────────────────────────
 // SUB-COMPONENTS
@@ -132,6 +133,7 @@ export default function AcademyDashboard() {
   const { state }   = useApp()
   const navigate    = useNavigate()
   const { onboardingComplete, behaviourScores, aiRecommendations, dogProfile, trainingInsights } = useAI()
+  const { can, tierMeta, packageMeta, greeting: configGreeting, motionLevel } = useAcademyConfig()
 
   const { enrolledCourses, ownedAddons, courseProgress, clientProfile, currentUser } = state
   const client   = clientProfile || currentUser

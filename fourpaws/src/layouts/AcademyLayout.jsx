@@ -1,66 +1,75 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
-  LogOut, Menu, X, ChevronRight, Shield, MapPin,
-  BarChart2, Clock, Award, User, Flame, Sparkles, Volume2,
-  Brain, Zap
+  LogOut, Menu, X, Shield, MapPin, BarChart2, Clock,
+  Award, Flame, Sparkles, Volume2, Brain, Zap, Wind,
+  Map, BookMarked, Activity, Archive, FileText, Star,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAI } from '../hooks/useAI'
+import { useAcademyConfig } from '../context/AcademyConfigContext'
 import { academyStatusLabel } from '../utils/academyIdentity'
-import { getClientTier } from '../ai/archetypes'
-import { speak, stopSpeaking, isVoiceEnabled, VOICE_COACH_AVAILABLE } from '../ai/voiceCoach'
+import { speak, stopSpeaking, VOICE_COACH_AVAILABLE } from '../ai/voiceCoach'
 import { loadStreak } from '../ai/aiMemory'
 import { getDynamicGreeting } from '../ai/concierge'
 import { loadAIMemory } from '../ai/aiMemory'
 
-const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',      to: '/academy',                exact: true  },
-  { icon: BookOpen,        label: 'Programmes',     to: '/academy',                exact: true  },
-  { icon: Package,         label: 'Add-Ons',        to: '/academy/addons',         exact: false },
-  { icon: MapPin,          label: 'Passport',       to: '/academy/passport',       exact: false },
-  { icon: Clock,           label: 'Timeline',       to: '/academy/timeline',       exact: false },
-  { icon: BarChart2,       label: 'Analytics',      to: '/academy/analytics',      exact: false },
-  { icon: AlertTriangle,   label: 'Emergency',      to: '/academy/emergency',      exact: false },
-  { icon: Brain,           label: 'Digital Twin',   to: '/academy/twin',           exact: false },
-  { icon: Sparkles,        label: 'Wellness',       to: '/academy/wellness',       exact: false },
-  { icon: Zap,             label: 'Weekly Report',  to: '/academy/report',         exact: false },
-  { icon: Award,           label: 'Archive',        to: '/academy/archive',        exact: false },
-]
+// Icon map from config navItem icon strings → Lucide components
+const ICON_MAP = {
+  LayoutDashboard, BookOpen, Package, AlertTriangle,
+  MapPin, Clock, BarChart2, Brain, Sparkles, Zap, Award, Archive,
+  Wind, Map, BookMarked, Activity, FileText, Star,
+}
 
-function TierBadge({ tier }) {
-  if (!tier) return null
+function NavIcon({ name, size = 15 }) {
+  const Comp = ICON_MAP[name] || BookOpen
+  return <Comp size={size} />
+}
+
+function TierBadge({ tierMeta, packageMeta }) {
+  if (!tierMeta) return null
   return (
     <span className="flex items-center gap-1 font-sans text-[9px] px-2 py-0.5 uppercase tracking-widest"
-      style={{ color: tier.colour, border: `1px solid ${tier.colour}30`, background: `${tier.colour}10` }}>
-      {tier.icon} {tier.name}
+      style={{ color: tierMeta.colour, border: `1px solid ${tierMeta.colour}30`, background: `${tierMeta.colour}10` }}>
+      {tierMeta.icon} {tierMeta.name}
     </span>
   )
 }
 
 export default function AcademyLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const location    = useLocation()
-  const navigate    = useNavigate()
-  const { state, logout } = useApp()
-  const { dogProfile, behaviourScores } = useAI()
+  const location  = useLocation()
+  const navigate  = useNavigate()
+  const { state, logout }   = useApp()
+  const { dogProfile }      = useAI()
+  const { navItems, tierMeta, packageMeta, can, greeting: configGreeting, motionLevel } = useAcademyConfig()
 
-  const memory      = loadAIMemory()
-  const streak      = loadStreak()
+  const memory  = loadAIMemory()
+  const streak  = loadStreak()
 
   const handleLogout = () => { logout(); navigate('/') }
 
-  const client      = state.clientProfile || state.currentUser
-  const dog         = dogProfile || state.dogProfile
-  const acStatus    = academyStatusLabel(state.academyStatus || 'pending')
+  const client   = state.clientProfile || state.currentUser
+  const dog      = dogProfile || state.dogProfile
+  const acStatus = academyStatusLabel(state.academyStatus || 'pending')
 
-  const completedLessons = Object.values(state.courseProgress)
-    .reduce((a, p) => a + (p.completedLessons?.length || 0), 0)
-  const tier = getClientTier(completedLessons)
+  const greeting = useMemo(() =>
+    getDynamicGreeting(client?.name, dog?.name, memory.sessionCount || 0),
+    [client?.name, dog?.name, memory.sessionCount]
+  )
 
-  const greeting = getDynamicGreeting(client?.name, dog?.name, memory.sessionCount || 0)
+  // Group nav items by their group property
+  const navGroups = useMemo(() => {
+    const groups = { core: [], intelligence: [], ai: [], premium: [] }
+    navItems.forEach(item => {
+      const g = item.group || 'core'
+      if (groups[g]) groups[g].push(item)
+      else groups.core.push(item)
+    })
+    return groups
+  }, [navItems])
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.to
@@ -72,7 +81,9 @@ export default function AcademyLayout() {
       {/* Brand */}
       <div className="px-6 py-6 border-b border-white/5 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <motion.span className="text-2xl" animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 6, repeat: Infinity }}>
+          <motion.span className="text-2xl"
+            animate={motionLevel !== 'standard' ? { rotate: [0, 5, -5, 0] } : {}}
+            transition={{ duration: 6, repeat: Infinity }}>
             🐾
           </motion.span>
           <div>
@@ -85,40 +96,115 @@ export default function AcademyLayout() {
       {/* Client identity */}
       <div className="px-6 py-5 border-b border-white/5 flex-shrink-0">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-full bg-gold-gradient flex items-center justify-center flex-shrink-0"
-            style={{ boxShadow: '0 0 12px rgba(201,168,76,0.3)' }}>
+          <motion.div
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: `linear-gradient(135deg, ${tierMeta?.colour || '#C9A84C'} 0%, ${tierMeta?.colour || '#F5E09A'}80 100%)`, boxShadow: `0 0 12px ${tierMeta?.colour || '#C9A84C'}30` }}
+            animate={motionLevel === 'ultra' ? { boxShadow: [`0 0 8px ${tierMeta?.colour || '#C9A84C'}20`, `0 0 18px ${tierMeta?.colour || '#C9A84C'}40`, `0 0 8px ${tierMeta?.colour || '#C9A84C'}20`] } : {}}
+            transition={{ duration: 3, repeat: Infinity }}>
             <span className="font-display text-base font-light text-charcoal-900">
               {(client?.name || 'A').charAt(0)}
             </span>
-          </div>
+          </motion.div>
           <div className="min-w-0">
             <div className="font-sans text-xs font-medium text-pearl truncate">{client?.name || 'Academy Member'}</div>
             {dog && <div className="font-sans text-[10px] text-silver-600 truncate">{dog.name}'s Academy</div>}
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <TierBadge tier={tier} />
+          <TierBadge tierMeta={tierMeta} packageMeta={packageMeta} />
           {streak.current > 0 && (
             <span className="flex items-center gap-1 font-sans text-[9px] text-orange-400">
               <Flame size={9} /> {streak.current}d
             </span>
           )}
         </div>
+        {/* Package name */}
+        {packageMeta && (
+          <div className="mt-2 font-sans text-[9px] text-silver-700 flex items-center gap-1">
+            <span>{packageMeta.icon}</span>
+            <span>{packageMeta.name}</span>
+          </div>
+        )}
       </div>
 
-      {/* Nav */}
+      {/* Dynamic Nav */}
       <nav className="flex-1 overflow-y-auto py-3">
-        {NAV_ITEMS.map(item => {
-          const active = isActive(item)
-          return (
-            <Link key={item.to + item.label} to={item.to} onClick={() => setSidebarOpen(false)}
-              className={`sidebar-item ${active ? 'active' : ''}`}>
-              <item.icon size={15} />
-              <span>{item.label}</span>
-              {active && <motion.div layoutId="navIndicator" className="ml-auto w-1 h-1 rounded-full bg-gold-500" />}
-            </Link>
-          )
-        })}
+        {/* Core group */}
+        {navGroups.core.length > 0 && (
+          <>
+            {navGroups.core.map(item => {
+              const active = isActive(item)
+              return (
+                <Link key={item.id} to={item.to} onClick={() => setSidebarOpen(false)}
+                  className={`sidebar-item ${active ? 'active' : ''}`}>
+                  <NavIcon name={item.icon} />
+                  <span>{item.label}</span>
+                  {active && <motion.div layoutId="navIndicator" className="ml-auto w-1 h-1 rounded-full" style={{ background: tierMeta?.colour || '#C9A84C' }} />}
+                </Link>
+              )
+            })}
+          </>
+        )}
+
+        {/* Intelligence group */}
+        {navGroups.intelligence.length > 0 && (
+          <>
+            <div className="px-4 pt-4 pb-1">
+              <div className="font-sans text-[8px] uppercase tracking-[0.3em] text-silver-800">Intelligence</div>
+            </div>
+            {navGroups.intelligence.map(item => {
+              const active = isActive(item)
+              return (
+                <Link key={item.id} to={item.to} onClick={() => setSidebarOpen(false)}
+                  className={`sidebar-item ${active ? 'active' : ''}`}>
+                  <NavIcon name={item.icon} />
+                  <span>{item.label}</span>
+                  {active && <motion.div layoutId={`navInd-${item.id}`} className="ml-auto w-1 h-1 rounded-full" style={{ background: tierMeta?.colour || '#C9A84C' }} />}
+                </Link>
+              )
+            })}
+          </>
+        )}
+
+        {/* AI systems group */}
+        {navGroups.ai.length > 0 && (
+          <>
+            <div className="px-4 pt-4 pb-1">
+              <div className="font-sans text-[8px] uppercase tracking-[0.3em] text-silver-800">AI Systems</div>
+            </div>
+            {navGroups.ai.map(item => {
+              const active = isActive(item)
+              return (
+                <Link key={item.id} to={item.to} onClick={() => setSidebarOpen(false)}
+                  className={`sidebar-item ${active ? 'active' : ''}`}>
+                  <NavIcon name={item.icon} />
+                  <span>{item.label}</span>
+                  {active && <motion.div layoutId={`navInd-${item.id}`} className="ml-auto w-1 h-1 rounded-full" style={{ background: tierMeta?.colour || '#C9A84C' }} />}
+                </Link>
+              )
+            })}
+          </>
+        )}
+
+        {/* Premium group */}
+        {navGroups.premium.length > 0 && (
+          <>
+            <div className="px-4 pt-4 pb-1">
+              <div className="font-sans text-[8px] uppercase tracking-[0.3em] text-silver-800">Premium</div>
+            </div>
+            {navGroups.premium.map(item => {
+              const active = isActive(item)
+              return (
+                <Link key={item.id} to={item.to} onClick={() => setSidebarOpen(false)}
+                  className={`sidebar-item ${active ? 'active' : ''}`}>
+                  <NavIcon name={item.icon} />
+                  <span>{item.label}</span>
+                  {active && <motion.div layoutId={`navInd-${item.id}`} className="ml-auto w-1 h-1 rounded-full" style={{ background: tierMeta?.colour || '#C9A84C' }} />}
+                </Link>
+              )
+            })}
+          </>
+        )}
 
         {/* Academy status */}
         <div className="px-4 pt-3 mt-3 border-t border-white/5">
@@ -131,13 +217,12 @@ export default function AcademyLayout() {
 
       {/* Footer */}
       <div className="flex-shrink-0 border-t border-white/5">
-        {VOICE_COACH_AVAILABLE && (
-          <button onClick={() => {
-            if (isVoiceEnabled()) { stopSpeaking() } else { speak(greeting) }
-          }}
+        {VOICE_COACH_AVAILABLE && can.voiceCoach && (
+          <button
+            onClick={() => { if (!speak) return; speak(greeting) }}
             className="sidebar-item w-full text-xs text-silver-600 hover:text-silver-300">
             <Volume2 size={14} />
-            <span>Voice Coach</span>
+            <span>Voice Concierge</span>
           </button>
         )}
         <button onClick={handleLogout} className="sidebar-item w-full text-xs">
@@ -149,14 +234,14 @@ export default function AcademyLayout() {
   )
 
   return (
-    <div className="flex h-screen bg-charcoal-900 overflow-hidden">
-      {/* ── Desktop Sidebar ── */}
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--academy-bg, #0A0A0A)' }}>
+      {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 flex-shrink-0 overflow-hidden"
         style={{ background: 'linear-gradient(180deg, #0D0D0D 0%, #0A0A0A 100%)' }}>
         <SidebarContent />
       </aside>
 
-      {/* ── Mobile Sidebar Overlay ── */}
+      {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -169,7 +254,8 @@ export default function AcademyLayout() {
               className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-white/5 lg:hidden"
               style={{ background: 'linear-gradient(180deg, #0D0D0D 0%, #0A0A0A 100%)' }}>
               <div className="absolute top-4 right-4">
-                <button onClick={() => setSidebarOpen(false)} className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-silver-500 hover:text-pearl">
+                <button onClick={() => setSidebarOpen(false)}
+                  className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-silver-500">
                   <X size={14} />
                 </button>
               </div>
@@ -179,12 +265,12 @@ export default function AcademyLayout() {
         )}
       </AnimatePresence>
 
-      {/* ── Main content ── */}
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar — mobile only */}
+        {/* Mobile top bar */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/5 flex-shrink-0"
           style={{ background: '#0A0A0A' }}>
-          <button onClick={() => setSidebarOpen(true)} className="w-8 h-8 flex items-center justify-center text-silver-500 hover:text-pearl">
+          <button onClick={() => setSidebarOpen(true)} className="w-8 h-8 flex items-center justify-center text-silver-500">
             <Menu size={18} />
           </button>
           <div className="flex items-center gap-2">
@@ -194,7 +280,6 @@ export default function AcademyLayout() {
           <div className="w-8" />
         </div>
 
-        {/* Scroll area */}
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>

@@ -13,8 +13,6 @@ const HomePage       = lazy(() => import('../pages/public/HomePage'))
 const AboutPage      = lazy(() => import('../pages/public/AboutPage'))
 const LoginPage      = lazy(() => import('../pages/public/LoginPage'))
 const ActivationPage = lazy(() => import('../pages/academy/ActivationPage'))
-
-// ── Onboarding ─────────────────────────────────────────────────
 const OnboardingQuiz = lazy(() => import('../pages/academy/OnboardingQuiz'))
 
 // ── Academy V1 ──────────────────────────────────────────────────
@@ -32,6 +30,13 @@ const DigitalTwin        = lazy(() => import('../pages/academy/DigitalTwin'))
 const WellnessDashboard  = lazy(() => import('../pages/academy/WellnessDashboard'))
 const WeeklyReport       = lazy(() => import('../pages/academy/WeeklyReport'))
 const LegacyArchive      = lazy(() => import('../pages/academy/LegacyArchive'))
+
+// ── Academy V3 ──────────────────────────────────────────────────
+const CalmnessCentre     = lazy(() => import('../pages/academy/CalmnessCentre'))
+const TransformationMap  = lazy(() => import('../pages/academy/TransformationMap'))
+const AcademyJournal     = lazy(() => import('../pages/academy/AcademyJournal'))
+const StabilityDashboard = lazy(() => import('../pages/academy/StabilityDashboard'))
+const AcademyCeremony    = lazy(() => import('../pages/academy/AcademyCeremony'))
 
 // ── Admin ──────────────────────────────────────────────────────
 const AdminDashboard   = lazy(() => import('../pages/admin/AdminDashboard'))
@@ -85,7 +90,6 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
-
         {/* Public */}
         <Route element={<PublicLayout />}>
           <Route path="/"      element={<HomePage />} />
@@ -94,13 +98,14 @@ export default function AppRoutes() {
         </Route>
 
         {/* Activation */}
-        <Route path="/activate" element={<ActivationGuard><ActivationPage /></ActivationGuard>} />
+        <Route path="/activate"
+          element={<ActivationGuard><ActivationPage /></ActivationGuard>} />
 
         {/* Onboarding */}
         <Route path="/academy/onboarding"
           element={<ClientRoute><OnboardingRoute><OnboardingQuiz /></OnboardingRoute></ClientRoute>} />
 
-        {/* Academy */}
+        {/* Academy — all routes under layout */}
         <Route element={
           <ClientRoute>
             <OnboardingGuard>
@@ -114,17 +119,24 @@ export default function AppRoutes() {
           <Route path="/academy/course/:courseId/lesson/:lessonId" element={<LessonPage />} />
           <Route path="/academy/addons"                            element={<AddonsPage />} />
 
-          {/* V1 features */}
+          {/* V1 */}
           <Route path="/academy/passport"   element={<PuppyPassport />} />
           <Route path="/academy/timeline"   element={<BehaviourTimeline />} />
           <Route path="/academy/analytics"  element={<BehaviourHeatmap />} />
           <Route path="/academy/emergency"  element={<EmergencyMode />} />
 
-          {/* V2 features */}
-          <Route path="/academy/twin"      element={<DigitalTwin />} />
-          <Route path="/academy/wellness"  element={<WellnessDashboard />} />
-          <Route path="/academy/report"    element={<WeeklyReport />} />
-          <Route path="/academy/archive"   element={<LegacyArchive />} />
+          {/* V2 */}
+          <Route path="/academy/twin"       element={<DigitalTwin />} />
+          <Route path="/academy/wellness"   element={<WellnessDashboard />} />
+          <Route path="/academy/report"     element={<WeeklyReport />} />
+          <Route path="/academy/archive"    element={<LegacyArchive />} />
+
+          {/* V3 */}
+          <Route path="/academy/calm"       element={<CalmnessCentre />} />
+          <Route path="/academy/map"        element={<TransformationMap />} />
+          <Route path="/academy/journal"    element={<AcademyJournal />} />
+          <Route path="/academy/stability"  element={<StabilityDashboard />} />
+          <Route path="/academy/ceremony"   element={<AcademyCeremony />} />
         </Route>
 
         {/* Admin */}

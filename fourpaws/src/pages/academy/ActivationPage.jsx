@@ -10,6 +10,7 @@ import {
   getOrCreateDeviceId,
 } from '../../utils/academyIdentity'
 import { issueLicense } from '../../utils/academyLicense'
+import { saveAcademyConfig, buildAcademyConfig } from '../../config/academyConfig'
 
 // ── Individual code segment input ────────────────────────────
 function CodeInput({ segments, onChange }) {
@@ -103,6 +104,14 @@ export default function ActivationPage() {
 
     // Issue license + link device ───────────────────────────
     issueLicense(result.entry)
+
+    // Load or build dynamic academy configuration ────────────
+    if (result.entry.config) {
+      saveAcademyConfig({ ...result.entry.config, version: 3 })
+    } else if (result.entry.packageId) {
+      const cfg = buildAcademyConfig({ packageId: result.entry.packageId, academyId: result.entry.academyId, clientId: result.entry.clientId })
+      saveAcademyConfig(cfg)
+    }
     const deviceIdentity = linkDeviceToClient(result.entry)
     const clientUser     = buildClientUserFromEntry(result.entry)
 
