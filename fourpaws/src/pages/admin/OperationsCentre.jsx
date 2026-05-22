@@ -61,7 +61,6 @@ function PriorityAlert({ alert, index, onAction }) {
 function ClientHealthRow({ client, index, onClick }) {
   const progress = client.courseProgress || {}
   const lessons  = Object.values(progress).reduce((a, p) => a + (p.completedLessons?.length || 0), 0)
-  const enrolled = client.enrolledCourses?.length || 0
   const lastAct  = client.lastActivity
     ? Math.floor((Date.now() - new Date(client.lastActivity)) / 86400000)
     : null
@@ -76,33 +75,24 @@ function ClientHealthRow({ client, index, onClick }) {
         whileHover={{ background: 'rgba(255,255,255,0.02)' }} transition={{ duration: 0.2 }}
         onClick={onClick}
       >
-        {/* Avatar */}
         <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-display text-sm"
           style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', color: '#C9A84C' }}>
           {(client.name || 'C').charAt(0)}
         </div>
-
-        {/* Name + dog */}
         <div className="flex-1 min-w-0">
           <div className="font-sans text-xs font-medium text-pearl truncate">{client.name}</div>
           {client.dog?.name && <div className="font-sans text-[9px] text-silver-600 truncate">{client.dog.name}</div>}
         </div>
-
-        {/* Engagement */}
         <div className="text-center w-12 flex-shrink-0">
           <div className="font-mono text-xs" style={{ color: engagementColour }}>
             {lastAct === null ? '—' : lastAct === 0 ? 'Today' : `${lastAct}d`}
           </div>
           <div className="font-sans text-[7px] text-silver-700 uppercase tracking-wider">Activity</div>
         </div>
-
-        {/* Lessons */}
         <div className="text-center w-12 flex-shrink-0">
           <div className="font-mono text-xs text-gold-500">{lessons}</div>
           <div className="font-sans text-[7px] text-silver-700 uppercase tracking-wider">Lessons</div>
         </div>
-
-        {/* Status dot */}
         <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: statusColour }} />
       </motion.div>
     </CardEntrance>
@@ -179,29 +169,33 @@ function ConciergeAutomations({ clients, navigate }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN OPERATIONS CENTRE
+// FIX: All hooks declared at top — no hooks after conditional returns.
+// Analytics loaded via useEffect; loading spinner shown until ready.
 // ─────────────────────────────────────────────────────────────────────────────
 export default function OperationsCentre() {
   const { state }  = useApp()
-  const [analyticsData, setAnalyticsData] = React.useState(null)
-  React.useEffect(() => {
+  const navigate   = useNavigate()
+
+  // ── ALL hooks must be declared before any conditional return ──
+  const [analyticsData, setAnalyticsData] = useState(null)
+  const [alertsTab, setAlertsTab]         = useState('priority')
+
+  useEffect(() => {
     import('../../dev/mockClients').then(({ getAnalyticsData }) => {
       setAnalyticsData(getAnalyticsData())
     })
   }, [])
-  if (!analyticsData) return null
-  const navigate   = useNavigate()
+
   const clients    = state.allClients || []
-  const analytics  = analyticsData
   const syncStatus = getSyncStatus()
-  const [alertsTab, setAlertsTab] = useState('priority')
 
   const alerts = useMemo(() => detectClientRisks(clients), [clients])
   const highAlerts   = alerts.filter(a => a.priority === 'high')
   const mediumAlerts = alerts.filter(a => a.priority === 'medium')
 
-  const activeClients = clients.filter(c => c.academyStatus === 'active').length
-  const pendingClients= clients.filter(c => c.academyStatus === 'pending').length
-  const totalLessons  = clients.reduce((acc, c) => {
+  const activeClients  = clients.filter(c => c.academyStatus === 'active').length
+  const pendingClients = clients.filter(c => c.academyStatus === 'pending').length
+  const totalLessons   = clients.reduce((acc, c) => {
     return acc + Object.values(c.courseProgress || {}).reduce((a, p) => a + (p.completedLessons?.length || 0), 0)
   }, 0)
 
@@ -215,6 +209,22 @@ export default function OperationsCentre() {
     })
     return dist
   }, [clients])
+
+  // ── Safe conditional render AFTER all hooks ──────────────────
+  if (!analyticsData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }}
+          className="w-8 h-8 rounded-full border-2 border-transparent"
+          style={{ borderTopColor: '#C9A84C', borderRightColor: 'rgba(201,168,76,0.15)' }}
+        />
+      </div>
+    )
+  }
+
+  const analytics = analyticsData
 
   return (
     <div className="min-h-screen p-6 lg:p-10 max-w-7xl mx-auto relative">
@@ -259,10 +269,10 @@ export default function OperationsCentre() {
       {/* ── Intelligence panels ─────────────────────────────── */}
       <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Clients',   value: clients.length, sub: `${activeClients} active`, icon: Users,      colour: '#C9A84C' },
-          { label: 'Active Clients',  value: activeClients,  sub: `${pendingClients} pending activation`, icon: Activity, colour: '#10B981' },
-          { label: 'Total Lessons',   value: totalLessons,   sub: 'across all academies', icon: TrendingUp,   colour: '#8B5CF6' },
-          { label: 'Priority Alerts', value: highAlerts.length, sub: `${mediumAlerts.length} medium priority`, icon: AlertTriangle, colour: highAlerts.length > 0 ? '#EF4444' : '#10B981' },
+          { label: 'Total Clients',   value: clients.length,       sub: `${activeClients} active`,              icon: Users,         colour: '#C9A84C' },
+          { label: 'Active Clients',  value: activeClients,         sub: `${pendingClients} pending activation`, icon: Activity,      colour: '#10B981' },
+          { label: 'Total Lessons',   value: totalLessons,          sub: 'across all academies',                 icon: TrendingUp,    colour: '#8B5CF6' },
+          { label: 'Priority Alerts', value: highAlerts.length,     sub: `${mediumAlerts.length} medium priority`, icon: AlertTriangle, colour: highAlerts.length > 0 ? '#EF4444' : '#10B981' },
         ].map((p, i) => (
           <StaggerItem key={p.label}>
             <IntelligencePanel {...p} />
@@ -336,7 +346,6 @@ export default function OperationsCentre() {
               </button>
             </div>
           </div>
-          {/* Column headers */}
           <div className="flex items-center gap-4 px-4 py-2 border-b border-white/[0.04]">
             <div className="w-8 flex-shrink-0" />
             <div className="flex-1 font-sans text-[8px] uppercase tracking-[0.3em] text-silver-800">Client</div>
@@ -374,9 +383,7 @@ export default function OperationsCentre() {
                   style={{ background: `${stage.colour}06`, border: `1px solid ${stage.colour}18` }}>
                   <div className="text-xl mb-1">{stage.icon}</div>
                   <div className="font-display text-lg font-light" style={{ color: stage.colour }}>{count}</div>
-                  <div className="font-sans text-[7px] text-silver-700 uppercase tracking-wider leading-tight mt-0.5">
-                    {stage.name.split(' ')[0]}
-                  </div>
+                  <div className="font-sans text-[8px] text-silver-700 mt-0.5 leading-tight">{stage.name}</div>
                 </div>
               )
             })}

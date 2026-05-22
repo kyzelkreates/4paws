@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// FOUR PAWS — LOGIN PAGE
-// Production-safe. ADMIN_USER is the only static import.
-// Demo client data is loaded via dynamic import at runtime — never bundled.
+// FOUR PAWS — ADMIN LOGIN PAGE
+// Admin-only credential entry. Clients access via /activate with their code.
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
@@ -9,9 +8,7 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Shield, Key } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { ADMIN_USER } from '../../data/adminUser'
-import {
-  seedRegistryFromClients,
-} from '../../utils/academyIdentity'
+import { seedRegistryFromClients } from '../../utils/academyIdentity'
 
 export default function LoginPage() {
   const [email,    setEmail]    = useState('')
@@ -28,45 +25,20 @@ export default function LoginPage() {
     setLoading(true)
     await new Promise(r => setTimeout(r, 800))
 
-    // @firewall-ignore-start — all lines below use runtime-only dynamic import()
-    // ── Admin ────────────────────────────────────────────────────────────────
+    // ── Admin login ──────────────────────────────────────────
     if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
       setUser(ADMIN_USER)
+      // @firewall-ignore-start — runtime-only dynamic import
       const { DEMO_CLIENTS } = await import('../../dev/mockClients')
       dispatch({ type: ACTIONS.SET_ALL_CLIENTS, payload: DEMO_CLIENTS })
       seedRegistryFromClients(DEMO_CLIENTS)
+      // @firewall-ignore-end
       notify('Welcome back to the Control Centre', 'success')
       navigate('/admin')
       return
     }
 
-    // ── Client (email + password) ────────────────────────────────────────────
-    const { DEMO_CLIENTS } = await import('../../dev/mockClients')
-    const client = DEMO_CLIENTS.find(c => c.email === email && c.password === password)
-    if (client) {
-      setUser({ ...client })
-      dispatch({ type: ACTIONS.SET_CLIENT_PROFILE,   payload: client })
-      dispatch({ type: ACTIONS.SET_ENROLLED_COURSES, payload: client.enrolledCourses })
-      dispatch({ type: ACTIONS.SET_OWNED_ADDONS,     payload: client.ownedAddons })
-      dispatch({ type: ACTIONS.SET_PROGRESS,         payload: client.courseProgress })
-      dispatch({ type: ACTIONS.SET_ALL_CLIENTS,      payload: DEMO_CLIENTS })
-      dispatch({
-        type: ACTIONS.SET_ACADEMY_IDENTITY,
-        payload: {
-          academyLinkCode: client.academyLinkCode,
-          academyId:       client.academyId,
-          academyStatus:   client.academyStatus,
-          linkedDevices:   client.linkedDevices || [],
-        }
-      })
-      seedRegistryFromClients(DEMO_CLIENTS)
-      notify('Welcome back to the Academy', 'success')
-      navigate('/academy')
-      return
-    }
-    // @firewall-ignore-end
-
-    setError('Invalid email or password. Please try again.')
+    setError('Invalid credentials. Admin access only.')
     setLoading(false)
   }
 
@@ -86,19 +58,23 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-3 group">
+          <div className="inline-flex items-center gap-3">
             <span className="text-3xl">🐾</span>
             <div className="text-left">
               <div className="font-display text-lg font-light tracking-[0.2em] text-pearl uppercase">Four Paws</div>
               <div className="font-sans text-[9px] font-medium tracking-[0.35em] uppercase text-gold-500">Academy</div>
             </div>
-          </Link>
+          </div>
         </div>
 
         <div className="glass-card gold-border p-10">
           <div className="mb-8">
-            <h1 className="luxury-heading text-3xl mb-2">Welcome Back</h1>
-            <p className="font-sans text-sm font-light text-silver-500">Sign in to access your private academy</p>
+            <div className="flex items-center gap-2 mb-3">
+              <Shield size={13} className="text-gold-500" />
+              <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-gold-600">Control Centre</span>
+            </div>
+            <h1 className="luxury-heading text-3xl mb-2">Admin Access</h1>
+            <p className="font-sans text-sm font-light text-silver-500">Sign in to manage your academy</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-8">
@@ -109,7 +85,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="premium-input"
-                placeholder="your@email.com"
+                placeholder="admin@fourpawsacademy.com"
                 required
                 autoComplete="email"
               />
@@ -151,46 +127,25 @@ export default function LoginPage() {
                   className="w-4 h-4 border border-charcoal-900/30 border-t-charcoal-900 rounded-full"
                 />
               ) : (
-                <>Sign In <ArrowRight size={14} /></>
+                <>Enter Control Centre <ArrowRight size={14} /></>
               )}
             </button>
           </form>
 
-          {/* Activation path */}
-          <div className="mt-6 pt-6 border-t border-white/5 text-center">
-            <p className="font-sans text-xs text-silver-600 mb-3">New client with an activation code?</p>
+          {/* Client activation path */}
+          <div className="mt-8 pt-6 border-t border-white/5 text-center">
+            <p className="font-sans text-xs text-silver-600 mb-3">Are you a client with an activation code?</p>
             <Link
               to="/activate"
               className="inline-flex items-center gap-2 btn-outline-gold text-xs w-full justify-center"
             >
-              <Key size={13} /> Activate with Academy Code
+              <Key size={13} /> Activate Your Academy
             </Link>
-          </div>
-
-          {/* Demo credentials */}
-          <div className="mt-6 pt-6 border-t border-white/5">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield size={12} className="text-gold-600" />
-              <span className="font-sans text-[10px] tracking-widest uppercase text-silver-600">Demo Access</span>
-            </div>
-            <div className="space-y-2 text-xs font-mono">
-              <div className="glass-card p-3 rounded-none">
-                <div className="text-gold-500 text-[10px] tracking-widest uppercase mb-1">Admin</div>
-                <div className="text-silver-400">admin@fourpawsacademy.com / admin2024</div>
-              </div>
-              <div className="glass-card p-3 rounded-none">
-                <div className="text-gold-500 text-[10px] tracking-widest uppercase mb-1">Client</div>
-                <div className="text-silver-400">v.hartley@hartleygroup.co.uk / demo123</div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <p className="text-center mt-6 font-sans text-xs font-light text-silver-600">
-          {"Don't have access? "}
-          <Link to="/" className="text-gold-500 hover:text-gold-300 transition-colors">
-            Contact the Academy
-          </Link>
+        <p className="text-center mt-6 font-sans text-xs font-light text-silver-700">
+          Four Paws Academy — Private Access Only
         </p>
       </motion.div>
     </div>

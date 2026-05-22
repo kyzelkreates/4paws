@@ -9,8 +9,6 @@ import LoadingScreen   from '../components/ui/LoadingScreen'
 import AcademyLockGate from '../components/ui/AcademyLockGate'
 
 // ── Public ─────────────────────────────────────────────────────
-const HomePage       = lazy(() => import('../pages/public/HomePage'))
-const AboutPage      = lazy(() => import('../pages/public/AboutPage'))
 const LoginPage      = lazy(() => import('../pages/public/LoginPage'))
 const ActivationPage = lazy(() => import('../pages/academy/ActivationPage'))
 const OnboardingQuiz = lazy(() => import('../pages/academy/OnboardingQuiz'))
@@ -66,37 +64,52 @@ const TrainerProfilesPage= lazy(() => import('../pages/admin/TrainerProfilesPage
 // ─────────────────────────────────────────────────────────────
 // GUARDS
 // ─────────────────────────────────────────────────────────────
+
+// Admin-only guard — the primary auth layer for this app
 function AdminRoute({ children }) {
   const { state } = useApp()
   if (!state.isAuthenticated) return <Navigate to="/login" replace />
-  if (state.userRole !== 'admin') return <Navigate to="/academy" replace />
+  if (state.userRole !== 'admin') return <Navigate to="/login" replace />
   return children
 }
 
+// Client route — wraps academy in license gate
+// Admins can preview academy pages (for testing) but land on /admin by default
 function ClientRoute({ children }) {
   const { state } = useApp()
   if (state.isAuthenticated && state.userRole === 'admin') return <Navigate to="/admin" replace />
   return <AcademyLockGate>{children}</AcademyLockGate>
 }
 
+// After onboarding completes, allow through to academy
+// FIX: checks both state AND aiMemory so the navigate() after completeOnboarding()
+// doesn't bounce back due to in-flight state update
 function OnboardingRoute({ children }) {
   const { state } = useApp()
-  if (!state.isAuthenticated) return <Navigate to="/" replace />
-  if (state.onboardingCompleted || isOnboardingComplete()) return <Navigate to="/academy" replace />
+  if (!state.isAuthenticated) return <Navigate to="/login" replace />
+  const done = state.onboardingCompleted || isOnboardingComplete()
+  if (done) return <Navigate to="/academy" replace />
   return children
 }
 
+// Guard academy routes — redirect to onboarding if not done yet
+// FIX: reads aiMemory directly so a fresh page load after onboarding completes
+// doesn't bounce back to /academy/onboarding before state hydrates
 function OnboardingGuard({ children }) {
   const { state } = useApp()
-  if (state.userRole === 'client' && !state.onboardingCompleted && !isOnboardingComplete()) {
+  const done = state.onboardingCompleted || isOnboardingComplete()
+  if (state.userRole === 'client' && !done) {
     return <Navigate to="/academy/onboarding" replace />
   }
   return children
 }
 
+// Activation guard — if already authenticated, redirect home
 function ActivationGuard({ children }) {
   const { state } = useApp()
-  if (state.isAuthenticated) return <Navigate to={state.userRole === 'admin' ? '/admin' : '/academy'} replace />
+  if (state.isAuthenticated) {
+    return <Navigate to={state.userRole === 'admin' ? '/admin' : '/academy'} replace />
+  }
   return children
 }
 
@@ -107,14 +120,16 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
-        {/* Public */}
+
+        {/* Root → login (this is an admin tool, not a public site) */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Login */}
         <Route element={<PublicLayout />}>
-          <Route path="/"      element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        {/* Activation */}
+        {/* Activation — client PWA entry point */}
         <Route path="/activate"
           element={<ActivationGuard><ActivationPage /></ActivationGuard>} />
 
@@ -165,7 +180,7 @@ export default function AppRoutes() {
           <Route path="/academy/sync"        element={<SyncStatusPage />} />
         </Route>
 
-        {/* Admin */}
+        {/* Admin — the primary purpose of this app */}
         <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route path="/admin"                   element={<OperationsCentre />} />
           <Route path="/admin/legacy"            element={<AdminDashboard />} />
@@ -179,7 +194,8 @@ export default function AppRoutes() {
           <Route path="/admin/team"              element={<TrainerProfilesPage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Catch-all → login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Suspense>
   )

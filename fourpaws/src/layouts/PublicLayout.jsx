@@ -2,14 +2,13 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
-import PublicNav from '../components/navigation/PublicNav'
 
+// Public layout — minimal shell (no nav; this app is admin/client access only)
 export default function PublicLayout() {
   const location = useLocation()
 
   return (
     <div className="min-h-screen bg-charcoal-900">
-      <PublicNav />
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
