@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
   LogOut, Menu, X, Shield, MapPin, BarChart2, Clock,
   Award, Flame, Sparkles, Volume2, Brain, Zap, Wind,
-  Map, BookMarked, Activity, Archive, FileText, Star,
+  Map, BookMarked, Activity, Archive, FileText, Star, Calendar, TrendingUp,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAI } from '../hooks/useAI'
@@ -15,12 +15,16 @@ import { speak, stopSpeaking, VOICE_COACH_AVAILABLE } from '../ai/voiceCoach'
 import { loadStreak } from '../ai/aiMemory'
 import { getDynamicGreeting } from '../ai/concierge'
 import { loadAIMemory } from '../ai/aiMemory'
+import { loadSeasonalTheme, injectSeasonalTheme } from '../ai/seasonalThemes'
+import { AmbientIdleState } from '../components/ui/LuxuryWidgets'
+import { useIntelligenceCore } from '../hooks/useIntelligenceCore'
+import { ScrollProgressBar } from '../components/animations/FadeIn'
 
 // Icon map from config navItem icon strings → Lucide components
 const ICON_MAP = {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
   MapPin, Clock, BarChart2, Brain, Sparkles, Zap, Award, Archive,
-  Wind, Map, BookMarked, Activity, FileText, Star,
+  Wind, Map, BookMarked, Activity, FileText, Star, Calendar, TrendingUp,
 }
 
 function NavIcon({ name, size = 15 }) {
@@ -39,6 +43,14 @@ function TierBadge({ tierMeta, packageMeta }) {
 }
 
 export default function AcademyLayout() {
+  // Inject seasonal theme on mount
+  React.useEffect(() => {
+    try {
+      const season = loadSeasonalTheme()
+      injectSeasonalTheme(season)
+    } catch {}
+  }, [])
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location  = useLocation()
   const navigate  = useNavigate()
@@ -123,6 +135,17 @@ export default function AcademyLayout() {
           <div className="mt-2 font-sans text-[9px] text-silver-700 flex items-center gap-1">
             <span>{packageMeta.icon}</span>
             <span>{packageMeta.name}</span>
+          </div>
+        )}
+
+        {/* Live emotional state */}
+        {dog && (
+          <div className="mt-3 flex items-center gap-2 pt-3 border-t border-white/5">
+            <motion.div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: '#10B981', boxShadow: '0 0 4px rgba(16,185,129,0.6)' }}
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2.5, repeat: Infinity }} />
+            <span className="font-sans text-[8px] text-silver-700 uppercase tracking-widest">Intelligence Active</span>
           </div>
         )}
       </div>
@@ -234,6 +257,8 @@ export default function AcademyLayout() {
   )
 
   return (
+    <>
+    <ScrollProgressBar />
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--academy-bg, #0A0A0A)' }}>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 flex-shrink-0 overflow-hidden"
@@ -285,5 +310,6 @@ export default function AcademyLayout() {
         </main>
       </div>
     </div>
+    </>
   )
 }

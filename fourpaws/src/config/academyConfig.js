@@ -251,6 +251,10 @@ export const ALL_NAV_ITEMS = [
   { id: 'journal',      label: 'Journal',          to: '/academy/journal',      icon: 'BookMarked',      feature: 'journal',           group: 'premium'      },
   { id: 'stability',    label: 'Stability',        to: '/academy/stability',    icon: 'Activity',        feature: 'stability_dashboard',group: 'premium'     },
   { id: 'ceremony',     label: 'Ceremonies',       to: '/academy/ceremony',     icon: 'Award',           feature: 'ceremony',          group: 'premium'      },
+
+  // Final Polish systems
+  { id: 'briefing',     label: 'Daily Briefing',   to: '/academy/briefing',     icon: 'Calendar',        feature: 'daily_briefing',    group: 'intelligence' },
+  { id: 'milestones',   label: 'Milestones',       to: '/academy/milestones',   icon: 'TrendingUp',      feature: 'milestones',        group: 'intelligence' },
 ]
 
 // ─────────────────────────────────────────────────────────────

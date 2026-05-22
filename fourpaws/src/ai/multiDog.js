@@ -84,3 +84,46 @@ export function getHouseholdInsight(dogs) {
 
   return insights
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RELATIONSHIP INTELLIGENCE — multi-dog household dynamics
+// ─────────────────────────────────────────────────────────────────────────────
+export function computeRelationshipIntelligence(dogs) {
+  if (!dogs || dogs.length < 2) return null
+
+  const pairs = []
+  for (let i = 0; i < dogs.length; i++) {
+    for (let j = i + 1; j < dogs.length; j++) {
+      const a = dogs[i], b = dogs[j]
+      const energyDiff   = Math.abs((a.energy   || 5) - (b.energy   || 5))
+      const anxietySum   = ((a.anxiety  || 5) + (b.anxiety  || 5)) / 2
+      const reactiveConflict = ((a.reactivity || 0) > 6 && (b.reactivity || 0) > 6)
+      const compatScore  = Math.max(0, 100 - energyDiff * 8 - anxietySum * 3 - (reactiveConflict ? 25 : 0))
+
+      let relationship = 'Harmonious'
+      let relationshipColour = '#10B981'
+      if (compatScore < 40)  { relationship = 'Needs Management';   relationshipColour = '#EF4444' }
+      else if (compatScore < 65) { relationship = 'Compatible';     relationshipColour = '#F59E0B' }
+
+      pairs.push({
+        dogs:       [a.name || `Dog ${i+1}`, b.name || `Dog ${j+1}`],
+        score:      Math.round(compatScore),
+        relationship,
+        relationshipColour,
+        insight:    compatScore > 65
+          ? `${a.name} and ${b.name} show natural compatibility. Group enrichment will benefit both.`
+          : reactiveConflict
+          ? `Both ${a.name} and ${b.name} exhibit reactive profiles. Independent training is essential before group work.`
+          : `${a.name} and ${b.name} benefit from managed introductions. Monitor shared arousal carefully.`,
+      })
+    }
+  }
+
+  return {
+    pairs,
+    householdScore: Math.round(pairs.reduce((a, p) => a + p.score, 0) / (pairs.length || 1)),
+    recommendation: pairs.some(p => p.score < 50)
+      ? 'Individual training takes priority in this household before expanding to group sessions.'
+      : 'This household is well-positioned for balanced individual and group training integration.',
+  }
+}

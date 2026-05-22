@@ -38,6 +38,10 @@ const AcademyJournal     = lazy(() => import('../pages/academy/AcademyJournal'))
 const StabilityDashboard = lazy(() => import('../pages/academy/StabilityDashboard'))
 const AcademyCeremony    = lazy(() => import('../pages/academy/AcademyCeremony'))
 
+// ── Academy Final Polish ─────────────────────────────────────
+const DailyBriefing         = lazy(() => import('../pages/academy/DailyBriefing'))
+const TransformationTimeline = lazy(() => import('../pages/academy/TransformationTimeline'))
+
 // ── Admin ──────────────────────────────────────────────────────
 const AdminDashboard   = lazy(() => import('../pages/admin/AdminDashboard'))
 const ClientsPage      = lazy(() => import('../pages/admin/ClientsPage'))
@@ -137,6 +141,8 @@ export default function AppRoutes() {
           <Route path="/academy/journal"    element={<AcademyJournal />} />
           <Route path="/academy/stability"  element={<StabilityDashboard />} />
           <Route path="/academy/ceremony"   element={<AcademyCeremony />} />
+          <Route path="/academy/briefing"  element={<DailyBriefing />} />
+          <Route path="/academy/milestones" element={<TransformationTimeline />} />
         </Route>
 
         {/* Admin */}
