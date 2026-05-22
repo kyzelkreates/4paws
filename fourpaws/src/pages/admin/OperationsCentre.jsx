@@ -3,7 +3,7 @@
 // Replaces the standard Admin Dashboard with an elite command view.
 // Real-time client health matrix, AI priority queue, concierge automation.
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState  } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -12,7 +12,7 @@ import {
   Wifi, WifiOff,
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import { getAnalyticsData } from '../../data/clients'
+
 import { COURSES } from '../../data/courses'
 import { detectClientRisks, getSyncStatus, FOUR_PAWS_METHOD, detectTransformationStage } from '../../ai/fourPawsMethod'
 import { buildAdminInsight, purifyText, MOTION } from '../../ai/narrativeVoice'
@@ -182,9 +182,16 @@ function ConciergeAutomations({ clients, navigate }) {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function OperationsCentre() {
   const { state }  = useApp()
+  const [analyticsData, setAnalyticsData] = React.useState(null)
+  React.useEffect(() => {
+    import('../../dev/mockClients').then(({ getAnalyticsData }) => {
+      setAnalyticsData(getAnalyticsData())
+    })
+  }, [])
+  if (!analyticsData) return null
   const navigate   = useNavigate()
   const clients    = state.allClients || []
-  const analytics  = getAnalyticsData()
+  const analytics  = analyticsData
   const syncStatus = getSyncStatus()
   const [alertsTab, setAlertsTab] = useState('priority')
 

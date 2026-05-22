@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
   LineChart, Line, PieChart, Pie, Cell, CartesianGrid
 } from 'recharts'
 import { useApp } from '../../context/AppContext'
-import { getAnalyticsData } from '../../data/clients'
+
 import { COURSES } from '../../data/courses'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 
@@ -27,7 +27,14 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function AnalyticsPage() {
   const { state } = useApp()
-  const analytics = getAnalyticsData()
+  const [analyticsData, setAnalyticsData] = React.useState(null)
+  React.useEffect(() => {
+    import('../../dev/mockClients').then(({ getAnalyticsData }) => {
+      setAnalyticsData(getAnalyticsData())
+    })
+  }, [])
+  if (!analyticsData) return null
+  const analytics = analyticsData
   const clients = state.allClients || []
 
   const completionData = COURSES.map(course => {

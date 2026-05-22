@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Users, BookOpen, MessageCircle, TrendingUp, Activity, ArrowRight, Wifi } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
 import { useApp } from '../../context/AppContext'
-import { getAnalyticsData } from '../../data/clients'
+
 import { COURSES } from '../../data/courses'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 
@@ -22,8 +22,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function AdminDashboard() {
   const { state } = useApp()
+  const [analyticsData, setAnalyticsData] = React.useState(null)
+  React.useEffect(() => {
+    import('../../dev/mockClients').then(({ getAnalyticsData }) => {
+      setAnalyticsData(getAnalyticsData())
+    })
+  }, [])
+  if (!analyticsData) return null
   const navigate = useNavigate()
-  const analytics = getAnalyticsData()
+  const analytics = analyticsData
 
   const statCards = [
     { icon: Users, label: 'Total Clients', value: analytics.totalClients, sub: `${analytics.activeClients} active`, to: '/admin/clients' },

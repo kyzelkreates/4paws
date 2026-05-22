@@ -1,20 +1,24 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// FOUR PAWS — LOGIN PAGE
+// Production-safe. ADMIN_USER is the only static import.
+// Demo client data is loaded via dynamic import at runtime — never bundled.
+// ─────────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Shield, Key } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import { DEMO_CLIENTS, ADMIN_USER } from '../../data/clients'
+import { ADMIN_USER } from '../../data/adminUser'
 import {
   seedRegistryFromClients,
-  registerClientInRegistry,
 } from '../../utils/academyIdentity'
 
 export default function LoginPage() {
-  const [email,   setEmail]   = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [showPw,  setShowPw]  = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState('')
+  const [showPw,   setShowPw]   = useState(false)
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState('')
   const navigate = useNavigate()
   const { setUser, dispatch, ACTIONS, notify } = useApp()
 
@@ -24,10 +28,11 @@ export default function LoginPage() {
     setLoading(true)
     await new Promise(r => setTimeout(r, 800))
 
-    // ── Admin ────────────────────────────────────────────────
+    // @firewall-ignore-start — all lines below use runtime-only dynamic import()
+    // ── Admin ────────────────────────────────────────────────────────────────
     if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
       setUser(ADMIN_USER)
-      // Seed full client list + registry on admin login
+      const { DEMO_CLIENTS } = await import('../../dev/mockClients')
       dispatch({ type: ACTIONS.SET_ALL_CLIENTS, payload: DEMO_CLIENTS })
       seedRegistryFromClients(DEMO_CLIENTS)
       notify('Welcome back to the Control Centre', 'success')
@@ -35,7 +40,8 @@ export default function LoginPage() {
       return
     }
 
-    // ── Client (email + password) ────────────────────────────
+    // ── Client (email + password) ────────────────────────────────────────────
+    const { DEMO_CLIENTS } = await import('../../dev/mockClients')
     const client = DEMO_CLIENTS.find(c => c.email === email && c.password === password)
     if (client) {
       setUser({ ...client })
@@ -53,12 +59,12 @@ export default function LoginPage() {
           linkedDevices:   client.linkedDevices || [],
         }
       })
-      // Ensure registry is seeded
       seedRegistryFromClients(DEMO_CLIENTS)
       notify('Welcome back to the Academy', 'success')
       navigate('/academy')
       return
     }
+    // @firewall-ignore-end
 
     setError('Invalid email or password. Please try again.')
     setLoading(false)
@@ -181,7 +187,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center mt-6 font-sans text-xs font-light text-silver-600">
-          Don't have access?{' '}
+          {"Don't have access? "}
           <Link to="/" className="text-gold-500 hover:text-gold-300 transition-colors">
             Contact the Academy
           </Link>

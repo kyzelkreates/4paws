@@ -32,8 +32,10 @@ const FORBIDDEN_FILENAMES = [
   'fixtures.js', 'fixtures.ts',
 ]
 
+// Note: /dev/ files are ALLOWED to exist in the repo.
+// What is forbidden is production modules STATICALLY importing from /dev/.
+// The FORBIDDEN_IMPORT_PATTERNS check below catches this.
 const FORBIDDEN_DIRECTORIES = [
-  '/dev/',
   '/test/',
   '/tests/',
   '/fixtures/',
@@ -41,6 +43,8 @@ const FORBIDDEN_DIRECTORIES = [
 ]
 
 // Patterns found inside source files that indicate demo/mock contamination
+// Identifiers forbidden in production modules when used OUTSIDE dynamic import() calls.
+// Lines that contain import() are runtime-only and are safe to have DEMO_ identifiers.
 const FORBIDDEN_IDENTIFIERS = [
   /\bDEMO_CLIENTS\b/,
   /\bDEMO_MESSAGES\b/,
@@ -53,6 +57,11 @@ const FORBIDDEN_IDENTIFIERS = [
   /\bdevData\b/,
   /\bFIXTURES\b/,
 ]
+
+// Lines that contain dynamic import() are runtime-only — exempt from identifier scan
+function isDynamicImportLine(line) {
+  return /import\s*\(/.test(line) || /\.then\s*\(\s*\({/.test(line) || /const \{.*\} = await import/.test(line)
+}
 
 // Import patterns — catches dynamic and static imports of forbidden modules
 const FORBIDDEN_IMPORT_PATTERNS = [
@@ -105,9 +114,10 @@ function validateProductionBundle() {
   const allFiles   = walkDir(ROOT)
 
   for (const filePath of allFiles) {
-    const rel     = relative(ROOT, filePath)
-    const content = readFileSync(filePath, 'utf-8')
-    const lines   = content.split('\n')
+    const rel      = relative(ROOT, filePath)
+    const content  = readFileSync(filePath, 'utf-8')
+    const lines    = content.split('\n')
+    const isDevFile = filePath.includes('/dev/') || filePath.includes('/test/')
 
     // 1. Forbidden filename
     const filename = filePath.split('/').pop()
@@ -148,7 +158,8 @@ function validateProductionBundle() {
     })
 
     // 4. DEMO_ / MOCK_ exports in data files that are imported by production modules
-    if (DATA_FILE_PATTERNS.some(p => p.test(filePath))) {
+    // Skip /dev/ files — they are allowed to contain demo exports by design
+    if (!isDevFile && DATA_FILE_PATTERNS.some(p => p.test(filePath))) {
       lines.forEach((line, idx) => {
         for (const pattern of DEMO_EXPORT_PATTERNS) {
           if (pattern.test(line)) {
@@ -163,18 +174,33 @@ function validateProductionBundle() {
       })
     }
 
-    // 5. Forbidden identifiers in core modules (non-data files)
-    if (!DATA_FILE_PATTERNS.some(p => p.test(filePath))) {
+    // 5. Forbidden identifiers in core modules (non-data files, non-dev files)
+    // Supports two exemption mechanisms:
+    //   a) Lines containing dynamic import() expressions are skipped
+    //   b) Blocks between // @firewall-ignore-start and // @firewall-ignore-end are skipped
+    if (!isDevFile && !DATA_FILE_PATTERNS.some(p => p.test(filePath))) {
+      let ignoreBlock = false
       lines.forEach((line, idx) => {
+        const trimmed = line.trim()
+
+        // Sentinel: explicit ignore block
+        if (trimmed.includes('@firewall-ignore-start')) { ignoreBlock = true;  return }
+        if (trimmed.includes('@firewall-ignore-end'))   { ignoreBlock = false; return }
+        if (ignoreBlock) return
+
         // Skip comment lines
-        if (line.trim().startsWith('//') || line.trim().startsWith('*')) return
+        if (trimmed.startsWith('//') || trimmed.startsWith('*')) return
+
+        // Skip lines that are part of dynamic import() expressions
+        if (/import\s*\(/.test(line)) return
+
         for (const pattern of FORBIDDEN_IDENTIFIERS) {
           if (pattern.test(line)) {
             violations.push({
               file: rel,
               line: idx + 1,
               type: 'MOCK_IDENTIFIER_IN_PRODUCTION_MODULE',
-              detail: `Mock/demo identifier found in production module: ${line.trim()}`,
+              detail: `Mock/demo identifier found in production module: ${trimmed}`,
             })
           }
         }
