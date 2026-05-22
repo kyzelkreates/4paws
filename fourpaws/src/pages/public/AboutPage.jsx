@@ -1,277 +1,249 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Award, BookOpen, Heart, Star, Zap } from 'lucide-react'
-import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
+import { ArrowRight, Award, BookOpen, Heart, Star, Zap, Shield, Users } from 'lucide-react'
+import { FadeIn, StaggerContainer, StaggerItem, CinematicReveal, LuxuryFrame, ScrollProgressBar } from '../../components/animations/FadeIn'
+import { StoryBlock, FullBleedStory, PullQuote, PremiumCTA, JourneyStep } from '../../components/ui/VisualStoryBlock'
+import LuxuryGallery from '../../components/ui/LuxuryGallery'
+
+const IMG = {
+  hero:        'https://media.base44.com/images/public/6a0f87a2403280642106cb46/33f547c90_generated_image.png',
+  calm:        'https://media.base44.com/images/public/6a0f87a2403280642106cb46/c9bb3e265_generated_image.png',
+  garden:      'https://media.base44.com/images/public/6a0f87a2403280642106cb46/873b16b5b_generated_image.png',
+  transform:   'https://media.base44.com/images/public/6a0f87a2403280642106cb46/1d0305805_generated_image.png',
+  connection:  'https://media.base44.com/images/public/6a0f87a2403280642106cb46/ad7860d46_generated_image.png',
+  estate:      'https://media.base44.com/images/public/6a0f87a2403280642106cb46/1e1d50ea4_generated_image.png',
+  training:    'https://media.base44.com/images/public/6a0f87a2403280642106cb46/630d9b1b4_generated_image.png',
+}
 
 const philosophy = [
-  { icon: Heart, title: 'Compassion First', desc: 'Every interaction is built on trust, respect, and genuine care for your dog\'s emotional wellbeing.' },
-  { icon: BookOpen, title: 'Science-Led', desc: 'Our methodology is grounded in the latest canine psychology, neuroscience, and behavioural science.' },
-  { icon: Award, title: 'Excellence Always', desc: 'We set and maintain the highest standards in canine education — nothing less is acceptable.' },
-  { icon: Zap, title: 'AI-Enhanced', desc: 'Proprietary enrichment intelligence personalises every programme for your dog\'s unique profile.' },
+  { icon: Heart,    title: 'Compassion First',   desc: 'Every interaction is built on trust, respect, and genuine care for your dog\'s emotional wellbeing. Force-free is not a method — it is a non-negotiable foundation.' },
+  { icon: BookOpen, title: 'Science-Led',         desc: 'Our methodology draws on the latest canine psychology, neuroscience, and attachment theory — translated into practical, elegant programmes.' },
+  { icon: Award,    title: 'Excellence Always',   desc: 'We set and maintain the highest standards in canine education. Nothing short of extraordinary is acceptable to our clients — or to us.' },
+  { icon: Zap,      title: 'AI-Enhanced',         desc: 'Our proprietary intelligence platform personalises every programme for your dog\'s unique emotional profile, learning style, and transformation trajectory.' },
+  { icon: Shield,   title: 'Private & Exclusive', desc: 'Four Paws is a private academy. We accept a limited number of clients each season, ensuring every family receives the attention they deserve.' },
+  { icon: Users,    title: 'Lifetime Support',    desc: 'Transformation is not a destination — it\'s an ongoing journey. Our concierge members receive lifetime access to evolving content and direct support.' },
 ]
 
 const stats = [
   { num: '500+', label: 'Dogs Transformed' },
-  { num: '12', label: 'Years of Excellence' },
-  { num: '98%', label: 'Satisfaction Rate' },
-  { num: '5★', label: 'Member Rating' },
+  { num: '12',   label: 'Years of Excellence' },
+  { num: '98%',  label: 'Satisfaction Rate'   },
+  { num: '5★',   label: 'Member Rating'       },
+]
+
+const galleryImages = [
+  { src: IMG.estate,     alt: 'Estate lifestyle dog walking' },
+  { src: IMG.training,   alt: 'Private training session'     },
+  { src: IMG.garden,     alt: 'Estate garden calm dog'       },
+  { src: IMG.connection, alt: 'Owner and dog emotional bond' },
 ]
 
 export default function AboutPage() {
   return (
     <div className="bg-charcoal-900 pt-20 overflow-hidden">
+      <ScrollProgressBar />
 
-      {/* Hero */}
-      <section className="py-24 px-6 relative">
-        <div className="absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%)' }} />
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex items-center justify-center gap-3 mb-5"
-          >
-            <div className="divider-gold w-8" />
-            <span className="section-label">Our Story</span>
-            <div className="divider-gold w-8" />
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="luxury-heading text-6xl lg:text-7xl mb-8"
-          >
-            Born from a Belief<br />
-            that <em className="text-gold-gradient">Dogs Deserve More</em>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="font-sans text-lg font-light text-silver-300 max-w-2xl mx-auto leading-relaxed"
-          >
-            Four Paws Academy was founded on a single, uncompromising belief: that the relationship between a dog and their owner 
-            is one of life's most extraordinary gifts — and it deserves to be extraordinary in every way.
-          </motion.p>
+      {/* ═══════════════════════════════════════════════════════
+          HERO — full-bleed cinematic
+      ═══════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden" style={{ minHeight: '60vh' }}>
+        <div className="absolute inset-0">
+          <img src={IMG.hero} alt="Four Paws Academy"
+            className="w-full h-full object-cover object-center"
+            fetchpriority="high"
+          />
+          <div className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.4) 100%)' }} />
+          <div className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 60% 60% at 30% 50%, rgba(201,168,76,0.08) 0%, transparent 60%)' }} />
         </div>
-      </section>
 
-      {/* Story */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <FadeIn direction="right">
-              {/* Image placeholder */}
-              <div className="relative">
-                <div className="glass-card gold-border aspect-[4/5] flex items-center justify-center overflow-hidden">
-                  <div className="text-center">
-                    <div className="text-8xl mb-6">🐕</div>
-                    <div className="section-label">The Academy</div>
-                  </div>
-                  {/* Gold corner accents */}
-                  <div className="absolute top-4 left-4 w-8 h-8 border-t border-l border-gold-500/40" />
-                  <div className="absolute top-4 right-4 w-8 h-8 border-t border-r border-gold-500/40" />
-                  <div className="absolute bottom-4 left-4 w-8 h-8 border-b border-l border-gold-500/40" />
-                  <div className="absolute bottom-4 right-4 w-8 h-8 border-b border-r border-gold-500/40" />
-                </div>
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute -bottom-6 -right-6 glass-card gold-border p-5 max-w-[180px]"
-                >
-                  <div className="stat-number text-3xl mb-1">12</div>
-                  <div className="font-sans text-[10px] text-silver-500 tracking-widest uppercase leading-snug">Years of canine excellence</div>
-                </motion.div>
-              </div>
-            </FadeIn>
-
-            <FadeIn direction="left">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="divider-gold w-8" />
-                <span className="section-label">Our Mission</span>
-              </div>
-              <h2 className="luxury-heading text-4xl lg:text-5xl mb-6">
-                Redefining What's Possible for Dogs and Their Owners
-              </h2>
-              <p className="font-sans text-base font-light text-silver-400 leading-relaxed mb-5">
-                Four Paws Academy was born from twelve years of working with the UK's most discerning dog owners — 
-                people who view their dogs not as pets, but as beloved family members deserving of the finest care and education.
-              </p>
-              <p className="font-sans text-base font-light text-silver-400 leading-relaxed mb-5">
-                We built a programme that matched the standards of everything else in our clients' lives: 
-                beautifully crafted, expertly executed, and quietly extraordinary in its results.
-              </p>
-              <p className="font-sans text-base font-light text-silver-400 leading-relaxed mb-10">
-                Today, Four Paws Academy stands as the UK's premier luxury canine transformation platform — 
-                where science, compassion, and excellence converge.
-              </p>
+        <div className="relative z-10 flex items-center min-h-[60vh] px-6 py-20 max-w-4xl">
+          <div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
+              className="flex items-center gap-3 mb-6">
+              <div className="divider-gold w-8" />
+              <span className="section-label">Our Story</span>
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="luxury-heading text-5xl lg:text-7xl mb-7 leading-tight">
+              Born from a Belief<br />that <em className="text-gold-gradient">Dogs Deserve More</em>
+            </motion.h1>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+              className="font-sans text-lg font-light text-silver-200 max-w-xl leading-relaxed mb-8">
+              Four Paws Academy was founded on a single, uncompromising belief: that the relationship between a dog and their owner
+              is one of life's most extraordinary gifts — and it deserves to be extraordinary in every way.
+            </motion.p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
               <Link to="/login" className="btn-gold inline-flex items-center gap-2 text-xs">
-                Join the Academy
-                <ArrowRight size={14} />
+                Enter the Academy <ArrowRight size={14} />
               </Link>
-            </FadeIn>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-20 px-6 relative"
-        style={{ background: 'linear-gradient(180deg, transparent, rgba(201,168,76,0.03) 50%, transparent)' }}>
-        <div className="max-w-4xl mx-auto">
-          <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* ═══════════════════════════════════════════════════════
+          STATS STRIP
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-12 px-6 border-y border-white/5"
+        style={{ background: 'linear-gradient(135deg, #0D0D0A 0%, #0A0A08 100%)' }}>
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map(s => (
-              <StaggerItem key={s.label}>
-                <div className="text-center">
-                  <div className="stat-number text-5xl lg:text-6xl mb-2">{s.num}</div>
-                  <div className="font-sans text-xs text-silver-600 tracking-widest uppercase">{s.label}</div>
-                </div>
-              </StaggerItem>
+              <FadeIn key={s.label} className="text-center">
+                <div className="stat-number text-4xl font-light mb-1">{s.num}</div>
+                <div className="font-sans text-[10px] text-silver-600 uppercase tracking-widest">{s.label}</div>
+              </FadeIn>
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </section>
 
-      {/* Philosophy */}
-      <section className="py-20 px-6">
+      {/* ═══════════════════════════════════════════════════════
+          OUR STORY — story block
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto">
+          <StoryBlock
+            image={{ src: IMG.training, alt: 'Private training session' }}
+            label="The Foundation"
+            headline="Where Science Meets<br /><em class='text-gold-gradient'>Compassion</em>"
+            body="Four Paws Academy was built by behaviourists who understood that most dogs are not failed by their owners — they are failed by the systems available to their owners. We created the academy that should have always existed: science-led, compassion-first, and profoundly effective."
+            body2="Over twelve years, we have developed a methodology that combines the latest canine psychology with an elegant, accessible delivery system. The result is transformation that is permanent — not temporary management."
+            cta="Meet Our Methodology"
+            ctaLink="/login"
+            imageLeft={true}
+            quote={{
+              text: "We saw too many brilliant dogs living in anxiety because their owners had no access to the right tools. That's why Four Paws exists.",
+              author: 'Academy Founders'
+            }}
+          />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FULL BLEED — connection moment
+      ═══════════════════════════════════════════════════════ */}
+      <FullBleedStory
+        image={{ src: IMG.connection, alt: 'Owner and dog emotional connection' }}
+        label="The Connection"
+        headline="Every Dog Deserves<br />to Feel <em>Safe.</em>"
+        body="Behind every reactive dog is an anxious dog. Behind every anxious dog is an unmet emotional need. Our entire methodology is built around addressing that need — with intelligence, patience, and genuine care."
+        cta="Begin the Journey"
+        ctaLink="/login"
+        textAlign="right"
+        overlayGradient="linear-gradient(270deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.2) 100%)"
+      />
+
+      {/* ═══════════════════════════════════════════════════════
+          PHILOSOPHY CARDS
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 px-6 relative">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201,168,76,0.04) 0%, transparent 70%)' }} />
         <div className="max-w-7xl mx-auto">
           <FadeIn className="text-center mb-16">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="divider-gold w-8" />
-              <span className="section-label">Our Philosophy</span>
+              <span className="section-label">Our Principles</span>
               <div className="divider-gold w-8" />
             </div>
-            <h2 className="luxury-heading text-5xl mb-6">The Four Pillars of<br /><em>Elite Training</em></h2>
+            <h2 className="luxury-heading text-5xl mb-4">Six Principles.<br /><em>One Standard.</em></h2>
+            <p className="font-sans text-base text-silver-500 max-w-lg mx-auto font-light">
+              Every decision we make is guided by these principles. Together, they define what it means to be Four Paws.
+            </p>
           </FadeIn>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {philosophy.map(p => (
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {philosophy.map((p, i) => (
               <StaggerItem key={p.title}>
-                <div className="glass-card gold-border-hover p-8 text-center group">
-                  <div className="w-12 h-12 mx-auto mb-5 rounded-full border border-gold-500/20 flex items-center justify-center group-hover:border-gold-500/50 transition-colors">
-                    <p.icon size={20} className="text-gold-500" />
+                <motion.div whileHover={{ y: -4, borderColor: 'rgba(201,168,76,0.4)' }}
+                  className="glass-card gold-border-hover p-8 h-full relative overflow-hidden group">
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: 'radial-gradient(ellipse 70% 70% at 50% 0%, rgba(201,168,76,0.05) 0%, transparent 70%)' }}
+                  />
+                  <div className="w-10 h-10 mb-6 relative">
+                    <motion.div className="absolute inset-0 rounded-full"
+                      style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)' }}
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }} />
+                    <p.icon size={20} className="text-gold-500 relative z-10 mt-2 ml-2" />
                   </div>
                   <h3 className="font-serif text-lg font-medium text-pearl mb-3">{p.title}</h3>
                   <p className="font-sans text-sm font-light text-silver-500 leading-relaxed">{p.desc}</p>
-                </div>
+                </motion.div>
               </StaggerItem>
             ))}
           </StaggerContainer>
         </div>
       </section>
 
-      {/* AI Section */}
-      <section className="py-20 px-6">
+      {/* ═══════════════════════════════════════════════════════
+          STORY BLOCK 2 — estate lifestyle
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 px-6 lg:px-12 relative">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 40% 40% at 80% 50%, rgba(201,168,76,0.04) 0%, transparent 70%)' }} />
         <div className="max-w-7xl mx-auto">
-          <div className="glass-card gold-border p-12 lg:p-16 relative overflow-hidden">
-            <div className="absolute inset-0"
-              style={{ background: 'radial-gradient(ellipse 50% 80% at 100% 50%, rgba(201,168,76,0.05) 0%, transparent 70%)' }} />
-            <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
-              <FadeIn>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="divider-gold w-8" />
-                  <span className="section-label">AI-Enhanced Learning</span>
-                </div>
-                <h2 className="luxury-heading text-4xl lg:text-5xl mb-6">
-                  Intelligence That<br />Adapts to <em>Your Dog</em>
-                </h2>
-                <p className="font-sans text-base font-light text-silver-400 leading-relaxed mb-6">
-                  Our proprietary AI enrichment engine analyses your dog's progress, learning style, and behavioural profile 
-                  to intelligently personalise every aspect of their programme.
-                </p>
-                <p className="font-sans text-base font-light text-silver-400 leading-relaxed">
-                  The result is an education that feels custom-built — because it is.
-                </p>
-              </FadeIn>
-              <FadeIn direction="left">
-                <div className="space-y-4">
-                  {[
-                    'Personalised lesson sequencing',
-                    'Adaptive pacing based on progress',
-                    'Enrichment recommendations tailored to breed & age',
-                    'Behavioural pattern recognition',
-                    'Progress celebration & milestone rewards',
-                  ].map((f, i) => (
-                    <motion.div
-                      key={f}
-                      initial={{ opacity: 0, x: 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-gold-gradient flex-shrink-0 flex items-center justify-center mt-0.5">
-                        <div className="w-1.5 h-1.5 bg-charcoal-900 rounded-full" />
-                      </div>
-                      <span className="font-sans text-sm font-light text-silver-300">{f}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </FadeIn>
-            </div>
-          </div>
+          <StoryBlock
+            image={{ src: IMG.estate, alt: 'Dog on English estate' }}
+            label="The Lifestyle"
+            headline="Dogs Built for the<br /><em class='text-gold-gradient'>Life You Live</em>"
+            body="Our clients are not ordinary dog owners. They hold high standards in every area of their lives — and they extend those standards to their relationship with their dog. Four Paws was created specifically for them."
+            cta="View Our Programmes"
+            ctaLink="/login"
+            imageLeft={false}
+            stats={[
+              { value: '12', label: 'Years' },
+              { value: '500+', label: 'Families' },
+              { value: '5★', label: 'Rating' },
+            ]}
+          />
         </div>
       </section>
 
-      {/* Founder */}
-      <section className="py-20 px-6">
+      {/* ═══════════════════════════════════════════════════════
+          GALLERY
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-16 px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <FadeIn className="text-center mb-16">
-            <div className="flex items-center justify-center gap-3 mb-4">
+          <FadeIn className="text-center mb-10">
+            <div className="flex items-center justify-center gap-3 mb-3">
               <div className="divider-gold w-8" />
-              <span className="section-label">The Founder</span>
+              <span className="section-label">The Academy in Moments</span>
               <div className="divider-gold w-8" />
             </div>
+            <h2 className="luxury-heading text-4xl">A Glimpse Into<br /><em>Four Paws World</em></h2>
           </FadeIn>
-          <div className="max-w-3xl mx-auto">
-            <FadeIn>
-              <div className="glass-card gold-border p-10 text-center">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-charcoal-800 border border-gold-500/30 flex items-center justify-center text-3xl">
-                  👩‍🏫
-                </div>
-                <h3 className="font-display text-3xl font-light text-pearl mb-2">Dr. Charlotte Pemberton</h3>
-                <div className="section-label mb-6">Founder & Chief Behaviourist</div>
-                <div className="divider-gold mb-6" />
-                <p className="font-serif text-lg font-light text-silver-300 leading-relaxed italic mb-6">
-                  "I created Four Paws Academy because I believed that exceptional dog owners deserved an exceptional academy. 
-                  Not just good training — but a transformative experience that honours the profound bond between dog and human."
-                </p>
-                <p className="font-sans text-sm font-light text-silver-500 leading-relaxed">
-                  BSc (Hons) Animal Behaviour · MSc Canine Cognition · PhD Companion Animal Psychology<br />
-                  Fellow of the Association of Pet Behaviour Counsellors · 12 years clinical practice
-                </p>
-              </div>
-            </FadeIn>
-          </div>
+          <LuxuryGallery images={galleryImages} layout="wide-strip" />
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-28 px-6 relative">
-        <div className="absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%)' }} />
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <FadeIn>
-            <h2 className="luxury-heading text-5xl lg:text-6xl mb-8">
-              Ready to Begin?
-            </h2>
-            <p className="font-sans text-base font-light text-silver-400 mb-10">
-              Join the exclusive community of discerning owners who have transformed their relationship with their dogs.
-            </p>
-            <Link to="/login" className="btn-gold inline-flex items-center gap-2 text-xs">
-              Begin Your Journey
-              <ArrowRight size={14} />
-            </Link>
-          </FadeIn>
-        </div>
+      {/* ═══════════════════════════════════════════════════════
+          PULL QUOTE
+      ═══════════════════════════════════════════════════════ */}
+      <section className="py-12 px-6">
+        <PullQuote
+          text="Twelve years of seeing dogs transform has never lost its magic. Every calm walk, every settled evening, every repaired relationship — this is why we exist."
+          author="Four Paws Academy"
+          location="Founded London, 2012"
+        />
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-10 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="font-sans text-xs text-silver-700">© 2024 Four Paws Training & Enrichment Academy. All rights reserved.</p>
-        </div>
-      </footer>
+      {/* ═══════════════════════════════════════════════════════
+          CTA
+      ═══════════════════════════════════════════════════════ */}
+      <PremiumCTA
+        image={IMG.garden}
+        headline="Your Dog's Transformation<br /><em>Starts Here</em>"
+        subtext="The private academy is accepting applications from a select number of new families this season. We would be honoured to welcome you."
+        primaryCta={{ label: 'Apply for Membership', link: '/login' }}
+        secondaryCta={{ label: 'Return Home', link: '/' }}
+      />
     </div>
   )
 }

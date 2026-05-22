@@ -1,154 +1,149 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 const navLinks = [
-  { label: 'Home', to: '/' },
+  { label: 'Home',     to: '/'      },
   { label: 'About Us', to: '/about' },
 ]
 
 export default function PublicNav() {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const location = useLocation()
-  const navigate = useNavigate()
+  const [scrolled,  setScrolled]  = useState(false)
+  const [menuOpen,  setMenuOpen]  = useState(false)
+  const [atTop,     setAtTop]     = useState(true)
+  const location  = useLocation()
+  const navigate  = useNavigate()
   const { state } = useApp()
 
+  const { scrollY } = useScroll()
+  const navOpacity = useTransform(scrollY, [0, 60], [0, 1])
+
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', handleScroll)
+    const handleScroll = () => {
+      const y = window.scrollY
+      setScrolled(y > 40)
+      setAtTop(y < 10)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => setMenuOpen(false), [location.pathname])
+  useEffect(() => setMenuOpen(false), [location])
+
+  const handleCTA = () => {
+    if (state.isAuthenticated) navigate(state.userRole === 'admin' ? '/admin' : '/academy')
+    else navigate('/login')
+  }
+
+  const isHome = location.pathname === '/'
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -80 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'backdrop-blur-xl border-b border-white/5' : ''
-        }`}
-        style={{ background: scrolled ? 'rgba(10,10,10,0.92)' : 'transparent' }}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between h-20">
+      {/* Desktop nav */}
+      <motion.header
+        className="fixed top-0 left-0 right-0 z-40 transition-all duration-500"
+        style={{
+          background: scrolled
+            ? 'rgba(8,8,8,0.92)'
+            : 'transparent',
+          backdropFilter: scrolled ? 'blur(16px) saturate(1.5)' : 'none',
+          borderBottom: scrolled ? '1px solid rgba(201,168,76,0.1)' : '1px solid transparent',
+        }}>
+
+        {/* Gold top accent line — visible when scrolled */}
+        <motion.div className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.6) 50%, transparent 100%)', opacity: scrolled ? 1 : 0 }}
+          animate={{ opacity: scrolled ? 1 : 0 }}
+          transition={{ duration: 0.4 }} />
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 relative">
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.3) 0%, transparent 70%)' }}
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
-                <span className="absolute inset-0 flex items-center justify-center text-lg">🐾</span>
-              </div>
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <motion.span className="text-xl"
+                animate={{ rotate: [0, 3, -3, 0] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}>
+                🐾
+              </motion.span>
               <div>
-                <div className="font-display text-sm font-light tracking-[0.15em] text-pearl uppercase leading-none">
-                  Four Paws
-                </div>
-                <div className="font-sans text-[9px] font-medium tracking-[0.3em] uppercase text-gold-500 leading-none mt-0.5">
-                  Academy
-                </div>
+                <div className="font-display text-sm font-light tracking-[0.22em] text-pearl uppercase leading-none transition-all duration-300 group-hover:text-gold-400">Four Paws</div>
+                <div className="font-sans text-[7px] tracking-[0.38em] uppercase text-gold-700">Elite Academy</div>
               </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-10">
-              {navLinks.map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 ${
-                    location.pathname === link.to
-                      ? 'text-gold-400'
-                      : 'text-silver-400 hover:text-pearl'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+            {/* Desktop links */}
+            <nav className="hidden lg:flex items-center gap-8">
+              {navLinks.map(link => {
+                const active = location.pathname === link.to
+                return (
+                  <Link key={link.to} to={link.to}
+                    className={`font-sans text-xs font-light tracking-widest uppercase transition-all duration-300 relative group ${active ? 'text-gold-400' : 'text-silver-400 hover:text-pearl'}`}>
+                    {link.label}
+                    <motion.div className="absolute -bottom-0.5 left-0 h-px"
+                      style={{ background: 'linear-gradient(90deg, #C9A84C, #F5E09A)' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: active ? '100%' : '0%' }}
+                      whileHover={{ width: '100%' }}
+                      transition={{ duration: 0.3 }} />
+                  </Link>
+                )
+              })}
 
-            {/* CTA */}
-            <div className="hidden md:flex items-center gap-4">
+              <div className="w-px h-4 bg-silver-800" />
+
               {state.isAuthenticated ? (
-                <button
-                  onClick={() => navigate(state.userRole === 'admin' ? '/admin' : '/academy')}
-                  className="btn-gold text-xs px-6 py-3"
-                >
-                  {state.userRole === 'admin' ? 'Control Centre' : 'My Academy'}
-                </button>
+                <motion.button onClick={handleCTA}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="font-sans text-xs tracking-widest uppercase px-5 py-2.5 transition-all duration-300"
+                  style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.4)', background: 'rgba(201,168,76,0.06)' }}>
+                  {state.userRole === 'admin' ? 'Dashboard' : 'Academy'}
+                </motion.button>
               ) : (
-                <>
-                  <Link to="/login" className="font-sans text-xs font-medium tracking-[0.2em] uppercase text-silver-400 hover:text-pearl transition-colors">
-                    Sign In
-                  </Link>
-                  <Link to="/login" className="btn-gold text-xs px-6 py-3">
-                    Join Academy
-                  </Link>
-                </>
+                <motion.button onClick={handleCTA}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="btn-gold inline-flex items-center gap-1.5 text-xs py-2.5 px-5">
+                  Enter Academy <ArrowRight size={11} />
+                </motion.button>
               )}
-            </div>
+            </nav>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden text-silver-400 hover:text-pearl transition-colors p-2"
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            {/* Mobile menu toggle */}
+            <button onClick={() => setMenuOpen(o => !o)}
+              className="lg:hidden w-9 h-9 flex items-center justify-center text-silver-400 hover:text-pearl transition-colors">
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
-      </motion.nav>
+      </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-x-0 top-20 z-40 backdrop-blur-xl border-b border-white/5"
-            style={{ background: 'rgba(10,10,10,0.97)' }}
-          >
-            <div className="px-6 py-8 space-y-6">
-              {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.to}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Link
-                    to={link.to}
-                    className={`block font-display text-2xl font-light tracking-tight ${
-                      location.pathname === link.to ? 'text-gold-400' : 'text-pearl'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
-              <div className="divider-gold" />
-              {state.isAuthenticated ? (
-                <button
-                  onClick={() => navigate(state.userRole === 'admin' ? '/admin' : '/academy')}
-                  className="btn-gold w-full text-center text-xs py-4"
-                >
-                  {state.userRole === 'admin' ? 'Control Centre' : 'My Academy'}
-                </button>
-              ) : (
-                <Link to="/login" className="btn-gold block w-full text-center text-xs py-4">
-                  Join Academy
+            className="fixed top-16 left-0 right-0 z-30 lg:hidden"
+            style={{ background: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+            <div className="px-6 py-6 space-y-4">
+              {navLinks.map(link => (
+                <Link key={link.to} to={link.to}
+                  className="block font-sans text-sm font-light tracking-widest uppercase py-2 transition-colors"
+                  style={{ color: location.pathname === link.to ? '#C9A84C' : 'rgba(255,255,255,0.6)' }}>
+                  {link.label}
                 </Link>
-              )}
+              ))}
+              <div className="pt-2 border-t border-white/5">
+                <button onClick={handleCTA}
+                  className="btn-gold w-full flex items-center justify-center gap-2 text-xs py-3">
+                  {state.isAuthenticated ? (state.userRole === 'admin' ? 'Dashboard' : 'My Academy') : 'Enter Academy'}
+                  <ArrowRight size={12} />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
