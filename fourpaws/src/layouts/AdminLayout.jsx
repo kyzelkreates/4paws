@@ -6,6 +6,8 @@ import {
   Share2, LogOut, Menu, X, ChevronRight, Bell, Shield
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { TeacherPanel, HelpTrigger, HelpCentre } from '../components/ui/TeacherPanel'
+import { useTeacher } from '../hooks/useTeacher'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/admin' },
@@ -17,6 +19,7 @@ const navItems = [
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const teacher = useTeacher('admin')
   const location = useLocation()
   const navigate = useNavigate()
   const { state, logout } = useApp()
@@ -63,6 +66,9 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-white/5 space-y-1">
+          <div className="pb-2">
+            <HelpTrigger onClick={teacher.handleOpenHelp} label="Orientation" />
+          </div>
           <Link to="/" className="sidebar-item w-full text-left">
             <span className="text-[11px] tracking-widest uppercase">View Website</span>
           </Link>
@@ -116,6 +122,18 @@ export default function AdminLayout() {
       </AnimatePresence>
 
       <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen">
+        {/* AI Teacher — contextual guidance for admin surfaces */}
+        {teacher.activeNode && (
+          <div className="px-6 pt-6 max-w-2xl">
+            <TeacherPanel
+              node={teacher.activeNode}
+              variant="admin"
+              onComplete={teacher.handleComplete}
+              onSkip={teacher.handleSkip}
+              onSkipAll={teacher.handleSkipAll}
+            />
+          </div>
+        )}
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -129,6 +147,20 @@ export default function AdminLayout() {
           </motion.div>
         </AnimatePresence>
       </main>
+      {/* Help Centre overlay */}
+      <AnimatePresence>
+        {teacher.helpOpen && (
+          <HelpCentre
+            surface="admin"
+            resumable={teacher.resumable}
+            completed={teacher.completed}
+            progress={teacher.progress}
+            onResume={teacher.handleResumeNode}
+            onClose={teacher.handleCloseHelp}
+            onReset={teacher.handleReset}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

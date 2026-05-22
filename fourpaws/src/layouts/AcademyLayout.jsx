@@ -19,6 +19,8 @@ import { loadSeasonalTheme, injectSeasonalTheme } from '../ai/seasonalThemes'
 import { AmbientIdleState } from '../components/ui/LuxuryWidgets'
 import { useIntelligenceCore } from '../hooks/useIntelligenceCore'
 import { ScrollProgressBar } from '../components/animations/FadeIn'
+import { TeacherPanel, HelpTrigger, HelpCentre } from '../components/ui/TeacherPanel'
+import { useTeacher } from '../hooks/useTeacher'
 
 // Icon map from config navItem icon strings → Lucide components
 const ICON_MAP = {
@@ -55,6 +57,7 @@ export default function AcademyLayout() {
   const location  = useLocation()
   const navigate  = useNavigate()
   const { state, logout }   = useApp()
+  const teacher = useTeacher('pwa')
   const { dogProfile }      = useAI()
   const { navItems, tierMeta, packageMeta, can, greeting: configGreeting, motionLevel } = useAcademyConfig()
 
@@ -146,6 +149,7 @@ export default function AcademyLayout() {
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2.5, repeat: Infinity }} />
             <span className="font-sans text-[8px] text-silver-700 uppercase tracking-widest">Intelligence Active</span>
+              <HelpTrigger onClick={teacher.handleOpenHelp} />
           </div>
         )}
       </div>
@@ -302,14 +306,40 @@ export default function AcademyLayout() {
             <span className="text-lg">🐾</span>
             <span className="font-display text-sm font-light tracking-[0.2em] text-pearl uppercase">Four Paws</span>
           </div>
-          <div className="w-8" />
+          <HelpTrigger onClick={teacher.handleOpenHelp} />
         </div>
 
         <main className="flex-1 overflow-y-auto">
+          {/* AI Teacher — contextual guidance, shown only when relevant */}
+          {teacher.activeNode && (
+            <div className="px-5 pt-5 max-w-2xl">
+              <TeacherPanel
+                node={teacher.activeNode}
+                variant="pwa"
+                onComplete={teacher.handleComplete}
+                onSkip={teacher.handleSkip}
+                onSkipAll={teacher.handleSkipAll}
+              />
+            </div>
+          )}
           <Outlet />
         </main>
       </div>
     </div>
+      {/* Help Centre overlay */}
+      <AnimatePresence>
+        {teacher.helpOpen && (
+          <HelpCentre
+            surface="pwa"
+            resumable={teacher.resumable}
+            completed={teacher.completed}
+            progress={teacher.progress}
+            onResume={teacher.handleResumeNode}
+            onClose={teacher.handleCloseHelp}
+            onReset={teacher.handleReset}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }
