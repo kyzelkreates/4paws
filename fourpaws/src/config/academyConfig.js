@@ -62,7 +62,8 @@ export const PACKAGES = {
     courses: ['course-1'],
     enabledFeatures: [
       'dashboard', 'courses', 'lessons', 'passport', 'journal',
-      'emergency', 'wellness_basic',
+      'emergency', 'wellness_basic', 'daily_briefing', 'daily_rituals',
+      'behaviour_reflection', 'milestones', 'method',
     ],
     enabledAI: ['behaviour_scores', 'enrichment_basic', 'daily_insight'],
     enabledDashboards: ['main', 'passport'],
@@ -84,7 +85,8 @@ export const PACKAGES = {
     enabledFeatures: [
       'dashboard', 'courses', 'lessons', 'passport', 'journal',
       'emergency', 'timeline', 'analytics', 'calm_centre',
-      'stability_dashboard', 'wellness_full',
+      'stability_dashboard', 'wellness_full', 'daily_briefing', 'daily_rituals',
+      'behaviour_reflection', 'scenarios', 'milestones', 'method',
     ],
     enabledAI: [
       'behaviour_scores', 'enrichment_full', 'daily_insight',
@@ -111,6 +113,8 @@ export const PACKAGES = {
       'journal', 'emergency', 'timeline', 'analytics', 'calm_centre',
       'stability_dashboard', 'wellness_full', 'digital_twin',
       'transformation_map', 'weekly_report', 'archive',
+      'daily_briefing', 'daily_rituals', 'behaviour_reflection',
+      'family_participation', 'scenarios', 'milestones', 'method',
     ],
     enabledAI: [
       'behaviour_scores', 'enrichment_full', 'daily_insight',
@@ -139,6 +143,8 @@ export const PACKAGES = {
       'journal', 'emergency', 'timeline', 'analytics', 'calm_centre',
       'stability_dashboard', 'wellness_full', 'digital_twin',
       'transformation_map', 'weekly_report', 'archive', 'ceremony',
+      'daily_briefing', 'daily_rituals', 'behaviour_reflection',
+      'family_participation', 'scenarios', 'milestones', 'method',
     ],
     enabledAI: [
       'behaviour_scores', 'enrichment_full', 'daily_insight',
@@ -167,7 +173,8 @@ export const PACKAGES = {
       'journal', 'emergency', 'timeline', 'analytics', 'calm_centre',
       'stability_dashboard', 'wellness_full', 'digital_twin',
       'transformation_map', 'weekly_report', 'archive', 'ceremony',
-      'soundscapes', 'theme_selector',
+      'soundscapes', 'theme_selector', 'daily_briefing', 'daily_rituals',
+      'behaviour_reflection', 'family_participation', 'scenarios', 'milestones', 'method',
     ],
     enabledAI: [
       'behaviour_scores', 'enrichment_full', 'daily_insight',
@@ -257,10 +264,10 @@ export const ALL_NAV_ITEMS = [
   { id: 'milestones',   label: 'Milestones',       to: '/academy/milestones',   icon: 'TrendingUp',      feature: 'milestones',        group: 'intelligence' },
 
   // Final Expansion systems
-  { id: 'companion',    label: 'Companion AI',     to: '/academy/companion',    icon: 'Sparkles',        feature: 'companion_chat',    group: 'ai'           },
+  { id: 'companion',    label: 'Companion AI',     to: '/academy/companion',    icon: 'Sparkles',        feature: 'behaviour_reflection', group: 'ai'        },
   { id: 'rituals',      label: 'Daily Rituals',    to: '/academy/rituals',      icon: 'Sun',             feature: 'daily_rituals',     group: 'ai'           },
   { id: 'scenarios',    label: 'Scenarios',        to: '/academy/scenarios',    icon: 'Zap',             feature: 'scenarios',         group: 'premium'      },
-  { id: 'method',       label: 'The Method™',      to: '/academy/method',       icon: 'BookOpen',        feature: 'four_paws_method',  group: 'core'         },
+  { id: 'method',       label: 'The Method™',      to: '/academy/method',       icon: 'BookOpen',        feature: 'method',            group: 'core'         },
 
   // Elite Operations Expansion (this run)
   { id: 'reflection',   label: 'Daily Reflection', to: '/academy/reflection',   icon: 'MessageSquare',   feature: 'behaviour_reflection', group: 'ai'        },
@@ -350,6 +357,17 @@ export const FEATURE_MATRIX = {
   ceremony:             { label: 'Academy Ceremonies',       icon: '🎖️',  tier: 4 },
   soundscapes:          { label: 'Ambient Soundscapes',      icon: '🎵', tier: 3 },
   theme_selector:       { label: 'Visual Theme System',      icon: '🎨', tier: 3 },
+  daily_briefing:       { label: 'Daily Briefing',           icon: '🌅', tier: 2 },
+  daily_rituals:        { label: 'Daily Rituals',            icon: '✨', tier: 2 },
+  behaviour_reflection: { label: 'Behaviour Reflection',     icon: '💭', tier: 2 },
+  family_participation: { label: 'Household Participation',  icon: '👨‍👩‍👧', tier: 3 },
+  scenarios:            { label: 'Scenario Simulator',       icon: '🎯', tier: 3 },
+  milestones:           { label: 'Transformation Timeline',  icon: '🏆', tier: 2 },
+  method:               { label: 'The Four Paws Method™',    icon: '📖', tier: 1 },
+  // ── Legacy aliases + system features ──────────────────────
+  companion_chat:       { label: 'Companion AI',              icon: '🐾', tier: 2 },
+  four_paws_method:     { label: 'The Four Paws Method™',    icon: '📖', tier: 1 },
+  sync_engine:          { label: 'Sync & Storage',            icon: '☁️',  tier: 1 },
 }
 
 // ─────────────────────────────────────────────────────────────
