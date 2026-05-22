@@ -2,10 +2,18 @@
   "buildCommand": "NODE_ENV=production FP_ENFORCE_FIREWALL=1 node build/firewall/mockDataGuard.js --production && FP_ENFORCE_FIREWALL=1 vite build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(manifest\\.json|manifest\\.webmanifest|registerSW\\.js|sw\\.js|workbox-.+\\.js|favicon\\.ico|.*\\.png|.*\\.svg|.*\\.woff2?)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
