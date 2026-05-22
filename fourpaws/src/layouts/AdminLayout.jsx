@@ -3,18 +3,37 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Users, MessageCircle, BarChart3,
-  Share2, LogOut, Menu, X, ChevronRight, Bell, Shield
+  Share2, LogOut, Menu, X, ChevronRight, Bell, Shield,
+  FileText, StickyNote, UserCog, BookOpen,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { TeacherPanel, HelpTrigger, HelpCentre } from '../components/ui/TeacherPanel'
 import { useTeacher } from '../hooks/useTeacher'
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', to: '/admin' },
-  { icon: Users, label: 'Clients', to: '/admin/clients' },
-  { icon: MessageCircle, label: 'Messages', to: '/admin/messages' },
-  { icon: BarChart3, label: 'Analytics', to: '/admin/analytics' },
-  { icon: Share2, label: 'Distribution', to: '/admin/distribution' },
+const NAV_GROUPS = [
+  {
+    label: 'Intelligence',
+    items: [
+      { icon: LayoutDashboard, label: 'Operations',   to: '/admin' },
+      { icon: BarChart3,       label: 'Analytics',    to: '/admin/analytics' },
+      { icon: FileText,        label: 'Reports',      to: '/admin/reports' },
+    ],
+  },
+  {
+    label: 'Clients',
+    items: [
+      { icon: Users,           label: 'Client Roster',to: '/admin/clients' },
+      { icon: MessageCircle,   label: 'Messages',     to: '/admin/messages' },
+      { icon: StickyNote,      label: 'Staff Notes',  to: '/admin/notes' },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { icon: Share2,          label: 'Distribution', to: '/admin/distribution' },
+      { icon: UserCog,         label: 'Trainer Team', to: '/admin/team' },
+    ],
+  },
 ]
 
 export default function AdminLayout() {
@@ -55,13 +74,20 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 py-4">
-          {navItems.map(item => (
-            <Link key={item.label} to={item.to} className={`sidebar-item ${isActive(item.to) ? 'active' : ''}`}>
-              <item.icon size={16} />
-              <span>{item.label}</span>
-              {isActive(item.to) && <ChevronRight size={12} className="ml-auto text-gold-500" />}
-            </Link>
+        <nav className="flex-1 py-3 overflow-y-auto">
+          {NAV_GROUPS.map(group => (
+            <div key={group.label} className="mb-2">
+              <div className="px-4 py-2 font-sans text-[7px] uppercase tracking-[0.4em] text-silver-800">
+                {group.label}
+              </div>
+              {group.items.map(item => (
+                <Link key={item.label} to={item.to} className={`sidebar-item ${isActive(item.to) ? 'active' : ''}`}>
+                  <item.icon size={15} />
+                  <span>{item.label}</span>
+                  {isActive(item.to) && <ChevronRight size={11} className="ml-auto text-gold-500" />}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
 

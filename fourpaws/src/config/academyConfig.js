@@ -261,6 +261,11 @@ export const ALL_NAV_ITEMS = [
   { id: 'rituals',      label: 'Daily Rituals',    to: '/academy/rituals',      icon: 'Sun',             feature: 'daily_rituals',     group: 'ai'           },
   { id: 'scenarios',    label: 'Scenarios',        to: '/academy/scenarios',    icon: 'Zap',             feature: 'scenarios',         group: 'premium'      },
   { id: 'method',       label: 'The Method™',      to: '/academy/method',       icon: 'BookOpen',        feature: 'four_paws_method',  group: 'core'         },
+
+  // Elite Operations Expansion (this run)
+  { id: 'reflection',   label: 'Daily Reflection', to: '/academy/reflection',   icon: 'MessageSquare',   feature: 'behaviour_reflection', group: 'ai'        },
+  { id: 'family',       label: 'Household',        to: '/academy/family',       icon: 'Users',           feature: 'family_participation', group: 'premium'   },
+  { id: 'sync',         label: 'Sync & Storage',   to: '/academy/sync',         icon: 'CloudCog',        feature: 'sync_engine',          group: 'core'      },
 ]
 
 // ─────────────────────────────────────────────────────────────

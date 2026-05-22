@@ -47,6 +47,9 @@ const CompanionChat       = lazy(() => import('../pages/academy/CompanionChat'))
 const DailyRituals        = lazy(() => import('../pages/academy/DailyRituals'))
 const ScenarioSimulator   = lazy(() => import('../pages/academy/ScenarioSimulator'))
 const FourPawsMethodPage  = lazy(() => import('../pages/academy/FourPawsMethod'))
+const BehaviourReflection = lazy(() => import('../pages/academy/BehaviourReflection'))
+const FamilyParticipation = lazy(() => import('../pages/academy/FamilyParticipation'))
+const SyncStatusPage      = lazy(() => import('../pages/academy/SyncStatus'))
 const OperationsCentre    = lazy(() => import('../pages/admin/OperationsCentre'))
 
 // ── Admin ──────────────────────────────────────────────────────
@@ -55,7 +58,10 @@ const ClientsPage      = lazy(() => import('../pages/admin/ClientsPage'))
 const ClientDetailPage = lazy(() => import('../pages/admin/ClientDetailPage'))
 const MessagingPage    = lazy(() => import('../pages/admin/MessagingPage'))
 const AnalyticsPage    = lazy(() => import('../pages/admin/AnalyticsPage'))
-const DistributionPage = lazy(() => import('../pages/admin/DistributionPage'))
+const DistributionPage   = lazy(() => import('../pages/admin/DistributionPage'))
+const ReportingStudio    = lazy(() => import('../pages/admin/ReportingStudio'))
+const StaffNotesPage     = lazy(() => import('../pages/admin/StaffNotesPage'))
+const TrainerProfilesPage= lazy(() => import('../pages/admin/TrainerProfilesPage'))
 
 // ─────────────────────────────────────────────────────────────
 // GUARDS
@@ -154,6 +160,9 @@ export default function AppRoutes() {
           <Route path="/academy/rituals"     element={<DailyRituals />} />
           <Route path="/academy/scenarios"   element={<ScenarioSimulator />} />
           <Route path="/academy/method"      element={<FourPawsMethodPage />} />
+          <Route path="/academy/reflection"  element={<BehaviourReflection />} />
+          <Route path="/academy/family"      element={<FamilyParticipation />} />
+          <Route path="/academy/sync"        element={<SyncStatusPage />} />
         </Route>
 
         {/* Admin */}
@@ -165,6 +174,9 @@ export default function AppRoutes() {
           <Route path="/admin/messages"          element={<MessagingPage />} />
           <Route path="/admin/analytics"         element={<AnalyticsPage />} />
           <Route path="/admin/distribution"      element={<DistributionPage />} />
+          <Route path="/admin/reports"           element={<ReportingStudio />} />
+          <Route path="/admin/notes"             element={<StaffNotesPage />} />
+          <Route path="/admin/team"              element={<TrainerProfilesPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

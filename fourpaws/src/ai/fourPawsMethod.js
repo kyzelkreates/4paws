@@ -389,19 +389,31 @@ export function getDailyReflectionQuestion(dogName, sessionCount = 0) {
   return REFLECTION_QUESTIONS[idx](dog)
 }
 
+// Returns a set of 6 daily reflection questions, rotated daily
+export function getDailyReflectionQuestions(dogName) {
+  const dog      = dogName || 'your companion'
+  const dayIndex = Math.floor(Date.now() / 86400000) // changes daily
+  const count    = REFLECTION_QUESTIONS.length
+  const indices  = []
+  for (let i = 0; i < 6; i++) {
+    indices.push((dayIndex + i) % count)
+  }
+  return indices.map(idx => REFLECTION_QUESTIONS[idx](dog))
+}
+
 export function saveReflectionAnswer(questionId, answer) {
   try {
-    const log   = JSON.parse(localStorage.getItem(RISK_KEYS.REFLECTION_LOG) || '[]')
     const today = new Date().toDateString()
-    log.unshift({ id: `ref-${Date.now()}`, questionId, answer, date: today, timestamp: new Date().toISOString() })
-    if (log.length > 100) log.splice(100)
+    const log   = JSON.parse(localStorage.getItem(RISK_KEYS.REFLECTION_LOG) || '{}')
+    if (!log[today]) log[today] = {}
+    log[today][questionId] = answer
     localStorage.setItem(RISK_KEYS.REFLECTION_LOG, JSON.stringify(log))
   } catch {}
 }
 
 export function loadReflectionLog() {
-  try { return JSON.parse(localStorage.getItem(RISK_KEYS.REFLECTION_LOG) || '[]') }
-  catch { return [] }
+  try { return JSON.parse(localStorage.getItem(RISK_KEYS.REFLECTION_LOG) || '{}') }
+  catch { return {} }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
