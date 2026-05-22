@@ -9,15 +9,29 @@ const EMOTIONAL_KEY = 'fp_emotional_state'
 // ─────────────────────────────────────────────────────────────
 // EMOTIONAL STATE MODEL
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// EMOTIONAL CONTINUITY MODEL — LBIL Spec-aligned
+// User-facing labels map to the 6-state spec model.
+// Internal IDs unchanged — all logic, derivatives, and LBIL routes remain stable.
+//
+// Spec states → internal mapping:
+//   Calm        → serene
+//   Stable      → settled
+//   Elevated    → alert / aroused
+//   Stressed    → anxious / reactive
+//   Recovering  → recovering
+//   Optimising  → (serene with high lesson count — derived in narrativeVoice)
+// ─────────────────────────────────────────────────────────────────────────────
 export const EMOTIONAL_STATES = {
-  SERENE:    { id: 'serene',    label: 'Serene',         icon: '🌸', colour: '#10B981', glow: 'rgba(16,185,129,0.3)',  desc: 'Deep emotional calm. Optimal for learning and bonding.' },
-  SETTLED:   { id: 'settled',   label: 'Settled',        icon: '🌿', colour: '#34D399', glow: 'rgba(52,211,153,0.25)', desc: 'Comfortable and regulated. Good for training.' },
-  ALERT:     { id: 'alert',     label: 'Alert',          icon: '👁️', colour: '#C9A84C', glow: 'rgba(201,168,76,0.3)',  desc: 'Engaged and watchful. Manageable with good threshold work.' },
-  AROUSED:   { id: 'aroused',   label: 'Aroused',        icon: '⚡', colour: '#F59E0B', glow: 'rgba(245,158,11,0.3)',  desc: 'Elevated energy and excitement. Impulse control needed.' },
-  ANXIOUS:   { id: 'anxious',   label: 'Anxious',        icon: '😰', colour: '#F97316', glow: 'rgba(249,115,22,0.3)',  desc: 'Stress indicators elevated. Decompression priority.' },
-  REACTIVE:  { id: 'reactive',  label: 'Reactive',       icon: '🌩️', colour: '#EF4444', glow: 'rgba(239,68,68,0.3)',   desc: 'Threshold exceeded. Recovery management required.' },
-  RECOVERING:{ id: 'recovering',label: 'Recovering',     icon: '💧', colour: '#8B5CF6', glow: 'rgba(139,92,246,0.3)',  desc: 'Post-arousal recovery phase. Allow time and space.' },
-  UNCERTAIN: { id: 'uncertain', label: 'Uncertain',      icon: '❓', colour: '#6B7280', glow: 'rgba(107,114,128,0.2)', desc: 'Insufficient data. Log mood entries to build a profile.' },
+  SERENE:    { id: 'serene',    label: 'Calm',       specState: 'calm',       icon: '🌸', colour: '#10B981', glow: 'rgba(16,185,129,0.3)',  desc: 'A deeply settled emotional state — the ideal condition for learning and connection.' },
+  SETTLED:   { id: 'settled',   label: 'Stable',     specState: 'stable',     icon: '🌿', colour: '#34D399', glow: 'rgba(52,211,153,0.25)', desc: "Emotionally regulated and receptive. Well-suited for today's session." },
+  ALERT:     { id: 'alert',     label: 'Elevated',   specState: 'elevated',   icon: '👁️', colour: '#C9A84C', glow: 'rgba(201,168,76,0.3)',  desc: 'Arousal is present. Threshold awareness and environment management are recommended.' },
+  AROUSED:   { id: 'aroused',   label: 'Elevated',   specState: 'elevated',   icon: '⚡', colour: '#F59E0B', glow: 'rgba(245,158,11,0.3)',  desc: 'Arousal is elevated. Begin with decompression before any formal engagement.' },
+  ANXIOUS:   { id: 'anxious',   label: 'Stressed',   specState: 'stressed',   icon: '😰', colour: '#F97316', glow: 'rgba(249,115,22,0.3)',  desc: 'Stress indicators are present. Decompression takes precedence over training today.' },
+  REACTIVE:  { id: 'reactive',  label: 'Stressed',   specState: 'stressed',   icon: '🌩️', colour: '#EF4444', glow: 'rgba(239,68,68,0.3)',   desc: 'Threshold has been reached. Suspend formal training and implement the recovery protocol.' },
+  RECOVERING:{ id: 'recovering',label: 'Recovering', specState: 'recovering', icon: '💧', colour: '#8B5CF6', glow: 'rgba(139,92,246,0.3)',  desc: 'Post-arousal recovery is underway. Allow time, quiet, and space.' },
+  OPTIMISING:{ id: 'optimising',label: 'Optimising', specState: 'optimising', icon: '✨', colour: '#C9A84C', glow: 'rgba(201,168,76,0.35)', desc: 'Exceptional consistency and emotional regulation. This is peak transformation territory.' },
+  UNCERTAIN: { id: 'uncertain', label: 'Establishing', specState: 'uncertain', icon: '○', colour: '#6B7280', glow: 'rgba(107,114,128,0.2)', desc: 'Emotional profile is still forming. Continue logging to build a complete picture.' },
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -60,6 +74,19 @@ export function deriveEmotionalState(behaviourScores, moodLog = []) {
   if (score < 74) return EMOTIONAL_STATES.ANXIOUS
   if (score < 85) return EMOTIONAL_STATES.REACTIVE
   return EMOTIONAL_STATES.RECOVERING
+}
+
+// ─────────────────────────────────────────────────────────────
+// OPTIMISING STATE — LBIL Spec (Product Lock)
+// Emerges when emotional load is very low AND training consistency is high.
+// Not a score — a derived state from combined conditions.
+// ─────────────────────────────────────────────────────────────
+export function deriveOptimising(behaviourScores, completedLessons, streakDays) {
+  if (!behaviourScores) return false
+  const ind = behaviourScores.individual || {}
+  const anxiety    = ind.anxiety    || 50
+  const reactivity = ind.reactivity || 50
+  return anxiety < 25 && reactivity < 25 && (completedLessons || 0) >= 10 && (streakDays || 0) >= 7
 }
 
 // ─────────────────────────────────────────────────────────────

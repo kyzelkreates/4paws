@@ -20,7 +20,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { scoreBehaviour, recommendCourses, recommendAddons, generateBehaviourInsight, generateProgressInsight } from './behaviourEngine'
-import { deriveEmotionalState, EMOTIONAL_STATES, loadEmotionalState } from './emotionalEngine'
+import { deriveEmotionalState, deriveOptimising, EMOTIONAL_STATES, loadEmotionalState } from './emotionalEngine'
 import { getDynamicGreeting, getConciergeCoachingSummary, getDailyTransformationInsight, generatePredictiveAlerts } from './concierge'
 import { loadAIMemory, saveAIMemory, patchAIMemory, recordBehaviourSnapshot, generateEnrichmentPlan, loadStreak, checkAndRecordMilestone } from './aiMemory'
 import { loadWellnessData, getWellnessSummary } from './wellness'
@@ -194,8 +194,12 @@ export function generateCoreIntelligence(dogProfile, clientProfile, enrolledCour
   // ── Behaviour scoring ──────────────────────────────────────
   const behaviourScores = dogProfile ? scoreBehaviour(dogProfile) : null
 
-  // ── Emotional state ────────────────────────────────────────
-  const emotionalState  = deriveEmotionalState(behaviourScores, wellnessData.moodLog || [])
+  // ── Emotional state — Emotional Continuity Model ──────────
+  let emotionalState = deriveEmotionalState(behaviourScores, wellnessData.moodLog || [])
+  // Override with OPTIMISING when conditions are met — the peak transformation state
+  if (deriveOptimising(behaviourScores, completedLessons, streak.current || 0)) {
+    emotionalState = EMOTIONAL_STATES.OPTIMISING
+  }
 
   // ── Completed lesson count ─────────────────────────────────
   const completedLessons = Object.values(courseProgress)

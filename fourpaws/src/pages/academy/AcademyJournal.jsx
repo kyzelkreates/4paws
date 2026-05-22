@@ -9,6 +9,7 @@ import { Plus, Trash2, BookOpen, Star, Zap, Heart, Edit3, Check, X } from 'lucid
 import { useApp } from '../../context/AppContext'
 import { useAI } from '../../hooks/useAI'
 import { loadNotes, saveNote, updateNote, deleteNote } from '../../ai/wellness'
+import { purifyText } from '../../ai/narrativeVoice'
 import { FadeIn, StaggerContainer, StaggerItem } from '../../components/animations/FadeIn'
 
 const NOTE_TYPES = {
@@ -270,7 +271,7 @@ export default function AcademyJournal() {
             <div className="text-5xl mb-4">📖</div>
             <h3 className="luxury-heading text-2xl mb-2">Your Journal Awaits</h3>
             <p className="font-sans text-sm text-silver-500 mb-6 max-w-sm mx-auto">
-              Every observation you record becomes part of {dogName}'s permanent academy record and contributes to the AI intelligence engine.
+              Every observation becomes a permanent part of {dogName}'s record — informing everything that follows.
             </p>
             <motion.button onClick={() => setComposing(true)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
               className="btn-gold inline-flex items-center gap-2 px-6 py-3 font-sans text-xs">

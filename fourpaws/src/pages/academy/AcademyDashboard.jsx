@@ -54,7 +54,7 @@ function CompanionOrb({ emotionalState, dogName }) {
       {/* Emotional state label — quiet, secondary */}
       <div className="text-center">
         <div className="font-sans text-[9px] font-medium tracking-widest uppercase"
-          style={{ color: es.colour }}>{es.label}</div>
+          style={{ color: es.colour }}>{es.specState ? es.specState.charAt(0).toUpperCase() + es.specState.slice(1) : es.label}</div>
         {dogName && (
           <div className="font-sans text-[8px] text-silver-700 mt-0.5">{dogName}</div>
         )}

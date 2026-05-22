@@ -134,6 +134,7 @@ function buildPrimaryInsight(dog, ind, es, streak, sessionCount) {
   else if (reactivity > 65) pool = INSIGHT_POOL.high_reactivity
   else if (confidence < 40) pool = INSIGHT_POOL.low_confidence
   else if (lessons < 3)     pool = INSIGHT_POOL.early_days
+  else if (es?.id === 'optimising') pool = INSIGHT_POOL.progressing  // Optimising → progressing narrative
   else if (streak?.current > 5 || confidence > 65) pool = INSIGHT_POOL.progressing
   else                      pool = INSIGHT_POOL.stable
 
@@ -205,6 +206,8 @@ const OBSERVATION_POOL = {
   reactive:  (d) => `${d}'s threshold was reached today. Note what preceded it. That information shapes tomorrow's plan.`,
   recovering:(d) => `${d} is in recovery. The speed of return to calm baseline is the progress marker worth watching.`,
   uncertain: (d) => null,
+  optimising: (d) => `${d}'s consistency over recent sessions is generating the kind of stable neurological environment where lasting behavioural change takes root.`,
+  establishing: (d) => null,
 }
 
 function buildEmotionalObservation(dog, es) {
