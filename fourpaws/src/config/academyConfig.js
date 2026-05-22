@@ -255,6 +255,12 @@ export const ALL_NAV_ITEMS = [
   // Final Polish systems
   { id: 'briefing',     label: 'Daily Briefing',   to: '/academy/briefing',     icon: 'Calendar',        feature: 'daily_briefing',    group: 'intelligence' },
   { id: 'milestones',   label: 'Milestones',       to: '/academy/milestones',   icon: 'TrendingUp',      feature: 'milestones',        group: 'intelligence' },
+
+  // Final Expansion systems
+  { id: 'companion',    label: 'Companion AI',     to: '/academy/companion',    icon: 'Sparkles',        feature: 'companion_chat',    group: 'ai'           },
+  { id: 'rituals',      label: 'Daily Rituals',    to: '/academy/rituals',      icon: 'Sun',             feature: 'daily_rituals',     group: 'ai'           },
+  { id: 'scenarios',    label: 'Scenarios',        to: '/academy/scenarios',    icon: 'Zap',             feature: 'scenarios',         group: 'premium'      },
+  { id: 'method',       label: 'The Method™',      to: '/academy/method',       icon: 'BookOpen',        feature: 'four_paws_method',  group: 'core'         },
 ]
 
 // ─────────────────────────────────────────────────────────────

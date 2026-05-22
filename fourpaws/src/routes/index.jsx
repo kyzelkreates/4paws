@@ -39,8 +39,15 @@ const StabilityDashboard = lazy(() => import('../pages/academy/StabilityDashboar
 const AcademyCeremony    = lazy(() => import('../pages/academy/AcademyCeremony'))
 
 // ── Academy Final Polish ─────────────────────────────────────
-const DailyBriefing         = lazy(() => import('../pages/academy/DailyBriefing'))
+const DailyBriefing          = lazy(() => import('../pages/academy/DailyBriefing'))
 const TransformationTimeline = lazy(() => import('../pages/academy/TransformationTimeline'))
+
+// ── Final Expansion ──────────────────────────────────────────
+const CompanionChat       = lazy(() => import('../pages/academy/CompanionChat'))
+const DailyRituals        = lazy(() => import('../pages/academy/DailyRituals'))
+const ScenarioSimulator   = lazy(() => import('../pages/academy/ScenarioSimulator'))
+const FourPawsMethodPage  = lazy(() => import('../pages/academy/FourPawsMethod'))
+const OperationsCentre    = lazy(() => import('../pages/admin/OperationsCentre'))
 
 // ── Admin ──────────────────────────────────────────────────────
 const AdminDashboard   = lazy(() => import('../pages/admin/AdminDashboard'))
@@ -141,13 +148,18 @@ export default function AppRoutes() {
           <Route path="/academy/journal"    element={<AcademyJournal />} />
           <Route path="/academy/stability"  element={<StabilityDashboard />} />
           <Route path="/academy/ceremony"   element={<AcademyCeremony />} />
-          <Route path="/academy/briefing"  element={<DailyBriefing />} />
-          <Route path="/academy/milestones" element={<TransformationTimeline />} />
+          <Route path="/academy/briefing"   element={<DailyBriefing />} />
+          <Route path="/academy/milestones"  element={<TransformationTimeline />} />
+          <Route path="/academy/companion"   element={<CompanionChat />} />
+          <Route path="/academy/rituals"     element={<DailyRituals />} />
+          <Route path="/academy/scenarios"   element={<ScenarioSimulator />} />
+          <Route path="/academy/method"      element={<FourPawsMethodPage />} />
         </Route>
 
         {/* Admin */}
         <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
-          <Route path="/admin"                   element={<AdminDashboard />} />
+          <Route path="/admin"                   element={<OperationsCentre />} />
+          <Route path="/admin/legacy"            element={<AdminDashboard />} />
           <Route path="/admin/clients"           element={<ClientsPage />} />
           <Route path="/admin/clients/:clientId" element={<ClientDetailPage />} />
           <Route path="/admin/messages"          element={<MessagingPage />} />

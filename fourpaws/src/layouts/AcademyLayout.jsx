@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
   LogOut, Menu, X, Shield, MapPin, BarChart2, Clock,
   Award, Flame, Sparkles, Volume2, Brain, Zap, Wind,
-  Map, BookMarked, Activity, Archive, FileText, Star, Calendar, TrendingUp,
+  Map, BookMarked, Activity, Archive, FileText, Star, Calendar, TrendingUp, Sun,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAI } from '../hooks/useAI'
@@ -24,7 +24,7 @@ import { ScrollProgressBar } from '../components/animations/FadeIn'
 const ICON_MAP = {
   LayoutDashboard, BookOpen, Package, AlertTriangle,
   MapPin, Clock, BarChart2, Brain, Sparkles, Zap, Award, Archive,
-  Wind, Map, BookMarked, Activity, FileText, Star, Calendar, TrendingUp,
+  Wind, Map, BookMarked, Activity, FileText, Star, Calendar, TrendingUp, Sun,
 }
 
 function NavIcon({ name, size = 15 }) {
