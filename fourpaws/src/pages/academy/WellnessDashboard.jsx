@@ -5,10 +5,10 @@ import { useApp } from '../../context/AppContext'
 import { useAI } from '../../hooks/useAI'
 import {
   loadWellnessData, logWellnessEntry, getWellnessSummary,
-  generateEnrichmentPlan, generateSmartSchedule,
+  generateEnrichmentPlan, generateSmartSchedule as genSchedule,
   RECOVERY_MODES, loadActiveRecoveryMode, setActiveRecoveryMode,
   SOUNDSCAPES, playSoundscape, stopSoundscape, isSoundscapePlaying,
-  loadSchedule, saveSchedule, generateSmartSchedule as genSchedule,
+  loadSchedule, saveSchedule,
   VISUAL_THEMES, loadActiveTheme, saveActiveTheme,
 } from '../../ai/wellness'
 import { logMoodEntry, loadDigitalTwin } from '../../ai/digitalTwin'
