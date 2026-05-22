@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fourPawsFirewallPlugin } from './build/firewall/viteFirewallPlugin.js'
 
 export default defineConfig({
   plugins: [
+    fourPawsFirewallPlugin(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',

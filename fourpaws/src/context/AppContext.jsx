@@ -71,6 +71,10 @@ const initialState = {
   lessonPriorityMap:   {},
   onboardingCompleted: false,  // true once quiz is done
 
+  // System mode — runtime only, NEVER influences production build inclusion
+  // 'real' = live data | 'mock' = demo data (dev/admin preview only)
+  systemMode:      'real',
+
   // UI
   sidebarOpen:     false,
   mobileMenuOpen:  false,
@@ -109,6 +113,7 @@ export const ACTIONS = {
   SET_ACTIVE_COURSE:  'SET_ACTIVE_COURSE',
   SET_ACTIVE_MODULE:  'SET_ACTIVE_MODULE',
   SET_ACTIVE_LESSON:  'SET_ACTIVE_LESSON',
+  SET_SYSTEM_MODE:    'SET_SYSTEM_MODE',
 
   // Messaging
   ADD_MESSAGE:      'ADD_MESSAGE',

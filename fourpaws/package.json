@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prebuild": "node build/firewall/mockDataGuard.js",
+    "build:strict": "NODE_ENV=production FP_ENFORCE_FIREWALL=1 node build/firewall/mockDataGuard.js --production && FP_ENFORCE_FIREWALL=1 vite build",
+    "build:check": "node build/firewall/mockDataGuard.js --production"
   },
   "dependencies": {
     "react": "^18.2.0",
